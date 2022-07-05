@@ -43,6 +43,8 @@ option(OPT_BUILD_DISCORD_PRESENCE "Build the Discord Rich Presence module" ON)
 option(OPT_BUILD_FREQUENCY_MANAGER "Build the Frequency Manager module" ON)
 option(OPT_BUILD_RECORDER "Audio and baseband recorder" ON)
 option(OPT_BUILD_RIGCTL_SERVER "Rigctl backend for controlling SDR++ with software like gpredict" ON)
+option(OPT_BUILD_GROUND_STATION_MGR "Ground Station Manager module" ON)
+
 
 # Core of SDR++
 add_subdirectory("core")
@@ -157,6 +159,10 @@ endif (OPT_BUILD_RECORDER)
 if (OPT_BUILD_RIGCTL_SERVER)
 add_subdirectory("misc_modules/rigctl_server")
 endif (OPT_BUILD_RIGCTL_SERVER)
+
+if (OPT_BUILD_GROUND_STATION_MGR)
+add_subdirectory("misc_modules/ground_station_mgr")
+endif (OPT_BUILD_GROUND_STATION_MGR)
 
 add_executable(sdrpp "src/main.cpp" "win32/resources.rc")
 target_link_libraries(sdrpp PRIVATE sdrpp_core)
