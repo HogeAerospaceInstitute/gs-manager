@@ -7,6 +7,8 @@
 #include <thread>
 
 #include "http_client.h"
+#include "gsm_task.h"
+
 
 #define CONCAT(a, b) ((std::string(a) + b).c_str())
 
@@ -18,11 +20,11 @@ static GsmHttpTransaction_t httpTxn;
 
 
 SDRPP_MOD_INFO {
-    /* Name:            */ "ground_station_mgr",
-    /* Description:     */ "Ground Station Manager",
-    /* Author:          */ "jrenkema",
-    /* Version:         */ 0, 1, 0,
-    /* Max instances    */ -1
+	/* Name:            */ "gs_mgr",
+	/* Description:     */ "Ground Station",
+	/* Author:          */ "jrenkema",
+	/* Version:         */ 0, 1, 0,
+	/* Max instances    */ -1
 };
 
 
@@ -30,10 +32,10 @@ SDRPP_MOD_INFO {
 class GsManagerModule : public ModuleManager::Instance {
 public:
 	GsManagerModule(std::string name) {
-        this->name = name;
-        gui::menu.registerEntry(name, menuHandler, this, NULL);
-        memset(&httpTxn, 0, sizeof(GsmHttpTransaction_t));
-    }
+		this->name = name;
+		gui::menu.registerEntry(name, menuHandler, this, NULL);
+		memset(&httpTxn, 0, sizeof(GsmHttpTransaction_t));
+	}
 
     virtual ~GsManagerModule() {
         gui::menu.removeEntry(name);
@@ -95,6 +97,43 @@ private:
 		else {
 			spdlog::info("GsManagerModule::menuHandler: client thread already running");
 		}
+    }
+
+    void handleHttpRsp() {
+
+    	if (httpTxn.status == GSM_HTTP_TRANSACTION_STATE_COMPLETE) {
+    		spdlog::info("GsManagerModule::handleHttpRsp: recv rsp");
+
+    		// TODO: clear existing list of tasks
+
+    		if (httpTxn.rsp.data[0] != '\0') {
+    			string tasksStr = httpTxn.rsp.data;
+
+    			// parse into json object
+    			json tasks = json::parse(tasksStr);
+
+    			// iterate the array
+    			for (json::iterator it = tasks.begin(); it != tasks.end(); ++it) {
+
+    				// allocate GsmTask
+    				GsmTask* pTask = new GsmTask;
+
+    				// fill in parameters
+    				pTask->init(*it);
+    				json task = *it;
+    				string uuidStr = task["UUID"];
+    				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
+    			}
+    		}
+    		else {
+        		spdlog::error("GsManagerModule::handleHttpRsp: no data in rsp!");
+    		}
+
+    		// reset httpTxn
+    		memset(&httpTxn, 0, sizeof(GsmHttpTransaction_t));
+    		httpTxn.status = GSM_HTTP_TRANSACTION_STATE_NULL;
+    	}
+
     }
 
     static void menuHandler(void* ctx) {
@@ -165,6 +204,7 @@ private:
         ImGui::Text("Tasks");
         ImGui::Separator();
 
+        // TODO: replace with GsmTask
         if (httpTxn.rsp.data[0] != '\0') {
         	ImGui::Text("Task List");
         	string tasks = httpTxn.rsp.data;
@@ -190,11 +230,16 @@ private:
         	memset(httpTxn.rsp.data, 0, GSM_MAX_HTTP_DATA_SIZE);
             spdlog::info("GsManagerModule::menuHandler: cleared tasks");
         }
+
+        // Check if HTTP response has been received
+        // TODO: need better mechanism
+        _this->handleHttpRsp();
     }
 
     std::string name;
     bool enabled = true;
 
+    std::map<string, GsmTask*> mTasks;
 
 };
 
