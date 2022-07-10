@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(ground_station_mgr)
 
-file(GLOB SRC "src/*.cpp")
+file(GLOB SRC "src/*.cpp" "gsm_task.h")
 
-add_library(gs_mgr SHARED ${SRC})
+add_library(ground_station_mgr SHARED ${SRC})
 target_link_libraries(ground_station_mgr PRIVATE sdrpp_core /usr/local/lib/libcurl.a /usr/local/lib64/libssl.a /usr/local/lib64/libcrypto.a)
 set_target_properties(ground_station_mgr PROPERTIES PREFIX "")
 
