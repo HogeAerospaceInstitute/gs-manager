@@ -9,6 +9,7 @@
 #define _GSM_HTTP_CLIENT_H_
 
 #include <string>
+#include <curl.h>
 
 using namespace std;
 

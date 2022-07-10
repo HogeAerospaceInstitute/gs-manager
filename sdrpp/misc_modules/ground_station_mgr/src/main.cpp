@@ -6,7 +6,7 @@
 #include <curl.h>
 #include <thread>
 
-#include "http_client.h"
+#include "gsm_http_client.h"
 #include "gsm_task.h"
 
 
@@ -20,8 +20,8 @@ static GsmHttpTransaction_t httpTxn;
 
 
 SDRPP_MOD_INFO {
-	/* Name:            */ "gs_mgr",
-	/* Description:     */ "Ground Station",
+	/* Name:            */ "ground_station_mgr",
+	/* Description:     */ "Ground Station Manager",
 	/* Author:          */ "jrenkema",
 	/* Version:         */ 0, 1, 0,
 	/* Max instances    */ -1
@@ -78,6 +78,7 @@ public:
     	pClient->send();
     	clientRunning = false;
 
+    	httpTxn.status = GSM_HTTP_TRANSACTION_STATE_COMPLETE;
     	spdlog::info("GsManagerModule::httpClientThreadEntry: exiting...");
     	return;
     }
@@ -90,9 +91,11 @@ private:
 
 		if (clientRunning == false) {
 			std::string webServer = config.conf["web-server"];
-			spdlog::info("GsManagerModule::menuHandler: querying server={0}", webServer.c_str());
+			spdlog::info("GsManagerModule::menuHandler: querying server={0}",
+						  webServer.c_str());
 			clientRunning = true;
-			static std::thread mHttpClientThread = std::thread(&GsManagerModule::httpClientThreadEntry);
+			static std::thread mHttpClientThread =
+							std::thread(&GsManagerModule::httpClientThreadEntry);
 		}
 		else {
 			spdlog::info("GsManagerModule::menuHandler: client thread already running");
@@ -112,6 +115,32 @@ private:
     			// parse into json object
     			json tasks = json::parse(tasksStr);
 
+    		    for (const auto& item : tasks.items())
+    		    {
+    		    	std::stringstream buffer;
+    		    	string tmpStr;
+    		    	buffer << item.value();
+    		    	tmpStr = buffer.str();
+		        	spdlog::info("GsManagerModule::handleHttpRsp: item={0}", tmpStr.c_str());
+
+		        	// allocate GsmTask
+    				GsmTask* pTask = new GsmTask;
+
+    				// fill in parameters
+    				pTask->init(tmpStr);
+
+    				string uuidStr;
+    				pTask->getUuid(uuidStr);
+    				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
+
+    		        //std::cout << item.key() << "\n";
+    		        //for (const auto& val : item.value().items())
+    		        //{
+    		        	//spdlog::info("GsManagerModule::handleHttpRsp: item={0}", item.value());
+    		           // std::cout << "  " << val.key() << ": " << val.value() << "\n";
+    		        //}
+    		    }
+#if 0
     			// iterate the array
     			for (json::iterator it = tasks.begin(); it != tasks.end(); ++it) {
 
@@ -119,11 +148,12 @@ private:
     				GsmTask* pTask = new GsmTask;
 
     				// fill in parameters
-    				pTask->init(*it);
+    				pTask->init(it->second);
     				json task = *it;
     				string uuidStr = task["UUID"];
     				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
     			}
+#endif
     		}
     		else {
         		spdlog::error("GsManagerModule::handleHttpRsp: no data in rsp!");
@@ -205,6 +235,22 @@ private:
         ImGui::Separator();
 
         // TODO: replace with GsmTask
+
+        if (!_this->mTasks.empty()) {
+        	std::map<string,GsmTask*>::iterator it;
+        	for (it = _this->mTasks.begin(); it != _this->mTasks.end(); ++it) {
+        		GsmTask* pTask = it->second;
+        		string taskStr;
+        		pTask->print(taskStr);
+        		ImGui::TextWrapped(taskStr.c_str());
+        		ImGui::Separator();
+        	}
+        }
+        else {
+        	ImGui::TextWrapped("No tasks are defined.");
+        }
+
+#if 0
         if (httpTxn.rsp.data[0] != '\0') {
         	ImGui::Text("Task List");
         	string tasks = httpTxn.rsp.data;
@@ -213,6 +259,7 @@ private:
         else {
         	ImGui::TextWrapped("No tasks are defined.");
         }
+#endif
 
         ImGui::Spacing();
 //        if (ImGui::Button("Refresh Tasks", ImVec2(menuColumnWidth, 0))) {
