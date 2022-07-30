@@ -24,11 +24,18 @@ The main classes are:
 
 ### Threading Architecture
 The Ground Station Manager is multithreaded module to support multiple transactions occuring simultaneously without impacting eachother.
-* Main thread - main thread created by sdr++
+* Module thread - main thread created by sdr++
+* Manager thread - Ground station manager thread used to send/receive messages from HTTP client and rotator control threads.
 * Http Client thread - thread created for each HTTP transaction to the web-server
-* Radio thread - thread used to communicate with Radio
-* Rotator thread - thread used to communicate with rotator
+* Rotator Control thread - thread used to communicate with rotator
 
+```mermaid
+flowchart LR
+    id0[SDR++ Module Thread] --> id1[Manager Thread]
+    id1[Manager Thread] --> id2[HTTP Client Thread]
+    id1[Manager Thread] --> id3[Rotator Control Thread]
+    id4[Timer Thread]
+```
 
 ## Building the software
 
