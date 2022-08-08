@@ -60,9 +60,9 @@ sequenceDiagram
 		GroundStationMgr-->>GroundStationMgr: Periodic Update Satellite Position Timer Expires
 		GroundStationMgr-->>Predict: Get Satellite Position Request (Satellite Name)
 		Predict-->>GroundStationMgr: Get Satellite Position Response (Az/El)
-		GroundStationMgr-->>Rotctld: Control Rotator Request (Az/El)
+		GroundStationMgr-->>Rotctld: Set Position Request (set_pos Az El)
 		Rotctld-->>Rotator: Easycomm Command (Az/El)
-		Rotctld-->>GroundStationMgr: Control Rotator Response
+		Rotctld-->>GroundStationMgr: Set Position Response
 	end
 
 ```
