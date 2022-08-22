@@ -1,8 +1,29 @@
+/* -----------------------------------------------------------------------------
+ * Copyright (C) 2022, Hoge Aerospace Institute
+ * This software is the confidential and proprietary information of the
+ * Hoge Aerospace Institute.
+ *
+ * ALL RIGHTS RESERVED
+ *
+ * Permission is hereby granted to licensees of Hoge Aerospace Institute
+ * products to use or abstract this computer program for the sole purpose of
+ * implementing a product based on Hoge Aerospace Institute products.  No
+ * other rights to reproduce, use, or disseminate this computer program,
+ * whether in part or in whole, are granted.
+ *
+ * Hoge Aerospace Institute makes no representation or warranties with respect
+ * to the performance of this computer program, and specifically disclaims any
+ * responsibility for any damages, special or consequential, connected with
+ * the use of this program.
+ * -----------------------------------------------------------------------------
+ */
+
+
 /*
- * http_client.h
+ * gsm_http_client.h
  *
  *  Created on: Jun 24, 2022
- *      Author: jrenkema
+ *
  */
 
 #ifndef _GSM_HTTP_CLIENT_H_
@@ -10,6 +31,11 @@
 
 #include <string>
 #include <curl.h>
+
+#include "gsm_globals.h"
+#include "gsm_msg.h"
+#include "gsm_comm_consumer.h"
+
 
 using namespace std;
 
@@ -40,7 +66,7 @@ typedef struct GsmHttpResponse {
 //    KeyValue headers;
 
    //body
-#define GSM_MAX_HTTP_DATA_SIZE		1024
+#define GSM_MAX_HTTP_DATA_SIZE		4096
     char data[GSM_MAX_HTTP_DATA_SIZE];
 } GsmHttpResponse_t;
 
@@ -60,11 +86,27 @@ typedef struct GsmHttpTransaction {
 } GsmHttpTransaction_t;
 
 
-class GsmHttpClient {
+extern ConfigManager gConfig;
+
+
+class GsmHttpClient : public GsmCommConsumer
+{
 
 	public:
-		GsmHttpClient();
+
+		static GsmHttpClient* getInstance();
+
 		virtual ~GsmHttpClient();
+
+
+		GsmResult_e onMessage(GsmMsg* _msg);
+		GsmResult_e onStart();
+		GsmResult_e onShutdown();
+
+		GsmResult_e handleRefreshTasksReq(GsmMsg* _msg);
+
+
+	public:
 
 		int init(GsmHttpTransaction_t& _txn);
 
@@ -83,8 +125,16 @@ class GsmHttpClient {
 
 	private:
 
+		static GsmHttpClient* mInstance;
+
+		GsmHttpClient();
+
+
 		CURL* mCurl;
     	int mTimeout;
+
+    	GsmHttpTransaction_t mHttpTxn;
+
 
 };
 

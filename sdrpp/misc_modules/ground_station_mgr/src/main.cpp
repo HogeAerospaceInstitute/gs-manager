@@ -1,3 +1,23 @@
+/* -----------------------------------------------------------------------------
+ * Copyright (C) 2022, Hoge Aerospace Institute
+ * This software is the confidential and proprietary information of the
+ * Hoge Aerospace Institute.
+ *
+ * ALL RIGHTS RESERVED
+ *
+ * Permission is hereby granted to licensees of Hoge Aerospace Institute
+ * products to use or abstract this computer program for the sole purpose of
+ * implementing a product based on Hoge Aerospace Institute products.  No
+ * other rights to reproduce, use, or disseminate this computer program,
+ * whether in part or in whole, are granted.
+ *
+ * Hoge Aerospace Institute makes no representation or warranties with respect
+ * to the performance of this computer program, and specifically disclaims any
+ * responsibility for any damages, special or consequential, connected with
+ * the use of this program.
+ * -----------------------------------------------------------------------------
+ */
+
 #include <imgui.h>
 #include <module.h>
 #include <gui/gui.h>
@@ -6,18 +26,22 @@
 #include <curl.h>
 #include <thread>
 
+#include <signal_path/signal_path.h>
+#include <signal_path/source.h>
+
+#include "gsm_globals.h"
 #include "gsm_http_client.h"
 #include "gsm_task.h"
+#include "gsm_msg.h"
+#include "gsm_rotator_controller.h"
+#include "gsm_comm_mgr.h"
+#include "ground_station_mgr.h"
 
 
 #define CONCAT(a, b) ((std::string(a) + b).c_str())
 
-static bool clientRunning = false;
-static ConfigManager config;
 
-// TODO: support multiple HTTP transactions
-static GsmHttpTransaction_t httpTxn;
-
+//extern ConfigManager gConfig;
 
 SDRPP_MOD_INFO {
 	/* Name:            */ "ground_station_mgr",
@@ -29,12 +53,12 @@ SDRPP_MOD_INFO {
 
 
 
-class GsManagerModule : public ModuleManager::Instance {
+class GsManagerModule : public ModuleManager::Instance
+{
 public:
 	GsManagerModule(std::string name) {
 		this->name = name;
 		gui::menu.registerEntry(name, menuHandler, this, NULL);
-		memset(&httpTxn, 0, sizeof(GsmHttpTransaction_t));
 	}
 
     virtual ~GsManagerModule() {
@@ -43,6 +67,25 @@ public:
 
     void postInit() {
         spdlog::info("GsManagerModule::postInit");
+
+        GsmCommMgr::getInstance()->init();
+
+        // Create and start services
+        GsmRotatorController::getInstance()->start();
+        GroundStationMgr::getInstance()->start();
+        GsmHttpClient::getInstance()->start();
+        //GsmTimerMgr::getInstance()->start();
+
+        // Register services with inter-thread communication manager
+        std::string rot = "ROTCTRL";
+        GsmCommMgr::getInstance()->registerConsumer(rot,
+        		(GsmCommConsumer*)GsmRotatorController::getInstance());
+        std::string gsm = "GSMGR";
+        GsmCommMgr::getInstance()->registerConsumer(gsm,
+        		(GsmCommConsumer*)GroundStationMgr::getInstance());
+        std::string http = "HTTPCLIENT";
+        GsmCommMgr::getInstance()->registerConsumer(http,
+        		(GsmCommConsumer*)GsmHttpClient::getInstance());
     }
 
     void enable() {
@@ -59,120 +102,94 @@ public:
         return enabled;
     }
 
-    static void httpClientThreadEntry() {
-
-        spdlog::info("GsManagerModule::httpClientThreadEntry: entering...");
-
-    	// instantiate new client object
-    	GsmHttpClient* pClient = new GsmHttpClient();
-
-        // "https://bowshock.onrender.com/api/ground_stations/ae78f216-d97a-4612-8f06-ab14d2dbc22a/tasks");
-
-    	// Fill in HTTP transaction message
-    	httpTxn.req.method = "GET";
-    	std::string webServer = config.conf["web-server"];
-    	std::string groundStationId = config.conf["ground-station-id"];
-    	httpTxn.req.url = "https://" + webServer + "/api/ground_stations/" + groundStationId + "/tasks";
-
-    	pClient->init(httpTxn);
-    	pClient->send();
-    	clientRunning = false;
-
-    	httpTxn.status = GSM_HTTP_TRANSACTION_STATE_COMPLETE;
-    	spdlog::info("GsManagerModule::httpClientThreadEntry: exiting...");
-    	return;
-    }
-
 
 private:
 
-    void handleRefreshTasksReq() {
-		spdlog::info("GsManagerModule::handleRefreshTasksReq: entered");
+    void onButtonPushRefreshTasks()
+    {
+		spdlog::info("GsManagerModule::onButtonPushRefreshTasks: entered");
 
-		if (clientRunning == false) {
-			std::string webServer = config.conf["web-server"];
-			spdlog::info("GsManagerModule::menuHandler: querying server={0}",
-						  webServer.c_str());
-			clientRunning = true;
-			static std::thread mHttpClientThread =
-							std::thread(&GsManagerModule::httpClientThreadEntry);
-		}
-		else {
-			spdlog::info("GsManagerModule::menuHandler: client thread already running");
-		}
+		GsmMsg* pMsg = new GsmMsg();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_REFRESH_TASKS_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+		GsmCommMgr::getInstance()->sendMsg(pMsg);
     }
 
-    void handleHttpRsp() {
 
-    	if (httpTxn.status == GSM_HTTP_TRANSACTION_STATE_COMPLETE) {
-    		spdlog::info("GsManagerModule::handleHttpRsp: recv rsp");
+    void onButtonPushClearTasks()
+    {
+		spdlog::info("GsManagerModule::onButtonPushClearTasks: entered");
 
-    		// TODO: clear existing list of tasks
+		GsmMsg* pMsg = new GsmMsg();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_CLEAR_TASKS_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 
-    		if (httpTxn.rsp.data[0] != '\0') {
-    			string tasksStr = httpTxn.rsp.data;
-
-    			// parse into json object
-    			json tasks = json::parse(tasksStr);
-
-    		    for (const auto& item : tasks.items())
-    		    {
-    		    	std::stringstream buffer;
-    		    	string tmpStr;
-    		    	buffer << item.value();
-    		    	tmpStr = buffer.str();
-		        	spdlog::info("GsManagerModule::handleHttpRsp: item={0}", tmpStr.c_str());
-
-		        	// allocate GsmTask
-    				GsmTask* pTask = new GsmTask;
-
-    				// fill in parameters
-    				pTask->init(tmpStr);
-
-    				string uuidStr;
-    				pTask->getUuid(uuidStr);
-    				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
-
-    		        //std::cout << item.key() << "\n";
-    		        //for (const auto& val : item.value().items())
-    		        //{
-    		        	//spdlog::info("GsManagerModule::handleHttpRsp: item={0}", item.value());
-    		           // std::cout << "  " << val.key() << ": " << val.value() << "\n";
-    		        //}
-    		    }
-#if 0
-    			// iterate the array
-    			for (json::iterator it = tasks.begin(); it != tasks.end(); ++it) {
-
-    				// allocate GsmTask
-    				GsmTask* pTask = new GsmTask;
-
-    				// fill in parameters
-    				pTask->init(it->second);
-    				json task = *it;
-    				string uuidStr = task["UUID"];
-    				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
-    			}
-#endif
-    		}
-    		else {
-        		spdlog::error("GsManagerModule::handleHttpRsp: no data in rsp!");
-    		}
-
-    		// reset httpTxn
-    		memset(&httpTxn, 0, sizeof(GsmHttpTransaction_t));
-    		httpTxn.status = GSM_HTTP_TRANSACTION_STATE_NULL;
-    	}
-
+    	GsmCommMgr::getInstance()->sendMsg(pMsg);
     }
 
-    static void menuHandler(void* ctx) {
+
+	void onButtonPushActivateTask(GsmTask* _task)
+	{
+		spdlog::info("GsManagerModule::onButtonPushActivateTask: entered");
+
+		GsmMsgActivateTaskReq* pMsg = new GsmMsgActivateTaskReq();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_ACTIVATE_TASK_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+		std::string taskId;
+		_task->getUuid(taskId);
+		pMsg->setTaskId(taskId);
+
+    	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
+
+	}
+
+	void onButtonPushTrackSatellite(GsmSatellite* _satellite)
+	{
+		spdlog::info("GsManagerModule::onButtonPushTrackSatellite: entered");
+
+		GsmMsgTrackSatelliteReq* pMsg = new GsmMsgTrackSatelliteReq();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_TRACK_SATELLITE_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+		std::string satelliteName;
+		_satellite->getName(satelliteName);
+		pMsg->setSatelliteName(satelliteName);
+
+    	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
+	}
+
+
+    void onButtonPushGetSatellitePos(GsmSatellite* _satellite)
+    {
+		spdlog::info("GsManagerModule::onButtonPushGetSatellitePos: entered");
+
+		GsmMsgGetSatellitePosReq* pMsg = new GsmMsgGetSatellitePosReq();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_GET_SATELLITE_POS_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+		std::string satelliteName;
+		_satellite->getName(satelliteName);
+		pMsg->setSatelliteName(satelliteName);
+
+    	GsmCommMgr::getInstance()->sendMsg(pMsg);
+    }
+
+
+    static void menuHandler(void* ctx)
+    {
     	GsManagerModule* _this = (GsManagerModule*)ctx;
         auto windowWidth = ImGui::GetWindowSize().x;
         float menuColumnWidth = ImGui::GetContentRegionAvailWidth();
         char inputBuf[256];
 
-        // Auto-center configuration section
+        // Configuration Section
         auto textWidth   = ImGui::CalcTextSize("Configuration").x;
         ImGui::Separator();
         ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
@@ -181,40 +198,42 @@ private:
 
         // Configure ground-station-id
         memset(inputBuf, 0, 256);
-        if (config.conf["ground-station-id"].is_null() == true) {
-            spdlog::info("GsManagerModule::menuHandler: setting ground-station to default");
-            config.acquire();
-        	config.conf["ground-station-id"] = "ae78f216-d97a-4612-8f06-ab14d2dbc22a";
-        	config.release(true);
+        if (gConfig.conf["ground-station-id"].is_null() == true) {
+            spdlog::info("GsManagerModule::menuHandler: set ground-station to default");
+            gConfig.acquire();
+            gConfig.conf["ground-station-id"] = "ae78f216-d97a-4612-8f06-ab14d2dbc22a";
+            gConfig.release(true);
         }
-        std::string groundStationId = config.conf["ground-station-id"];
+        std::string groundStationId = gConfig.conf["ground-station-id"];
         std::strncpy(inputBuf, groundStationId.c_str(), 256);
         inputBuf[256] = '\0';
         ImGui::LeftLabel("Ground Station Id");
         if (ImGui::InputText("##Ground Station Id", inputBuf, 256)) {
-            spdlog::info("GsManagerModule::menuHandler: set ground-station-id={0}", inputBuf);
-            config.acquire();
-            config.conf["ground-station-id"] = inputBuf;
-            config.release(true);
+            spdlog::info("GsManagerModule::menuHandler: set ground-station-id={0}",
+            			  inputBuf);
+            gConfig.acquire();
+            gConfig.conf["ground-station-id"] = inputBuf;
+            gConfig.release(true);
         }
 
         // Configure web-server
         memset(inputBuf, 0, 256);
-        if (!config.conf.contains("web-server")) {
+        if (!gConfig.conf.contains("web-server")) {
             spdlog::info("GsManagerModule::menuHandler: setting web-server to default");
-            config.acquire();
-        	config.conf["web-server"] = "bowshock.onrender.com";
-        	config.release(true);
+            gConfig.acquire();
+            gConfig.conf["web-server"] = "bowshock.onrender.com";
+            gConfig.release(true);
         }
-        std::string webServer = config.conf["web-server"];
+        std::string webServer = gConfig.conf["web-server"];
         std::strncpy(inputBuf, webServer.c_str(), 256);
         inputBuf[256] = '\0';
         ImGui::LeftLabel("Web Server");
         if (ImGui::InputText("##Web Server", inputBuf, 256)) {
-            spdlog::info("GsManagerModule::menuHandler: set web-server={0}", inputBuf);
-            config.acquire();
-            config.conf["web-server"] = inputBuf;
-            config.release(true);
+            spdlog::info("GsManagerModule::menuHandler: set web-server={0}",
+            			 inputBuf);
+            gConfig.acquire();
+            gConfig.conf["web-server"] = inputBuf;
+            gConfig.release(true);
         }
 
         // Configure auto-refresh
@@ -222,71 +241,114 @@ private:
         ImGui::LeftLabel("Auto-Refresh Tasks");
         bool autoRefreshEnabled = true;
         if (ImGui::Checkbox("##Auto-Refresh Tasks", &autoRefreshEnabled)) {
-            spdlog::info("GsManagerModule::menuHandler: set auto-refresh={0}", autoRefreshEnabled);
-            config.acquire();
-            config.conf["auto-refresh-tasks"] = autoRefreshEnabled;
-            config.release(true);
+            spdlog::info("GsManagerModule::menuHandler: set auto-refresh={0}",
+            			 autoRefreshEnabled);
+            gConfig.acquire();
+            gConfig.conf["auto-refresh-tasks"] = autoRefreshEnabled;
+            gConfig.release(true);
         }
 
+        // Tasks Section
         textWidth   = ImGui::CalcTextSize("Tasks").x;
         ImGui::Separator();
         ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
         ImGui::Text("Tasks");
         ImGui::Separator();
 
-        // TODO: replace with GsmTask
+        std::map<string, GsmTask*> tasks;
+        GroundStationMgr::getInstance()->getTasks(tasks);
 
-        if (!_this->mTasks.empty()) {
+        if (!tasks.empty())
+        {
         	std::map<string,GsmTask*>::iterator it;
-        	for (it = _this->mTasks.begin(); it != _this->mTasks.end(); ++it) {
+        	for (it = tasks.begin(); it != tasks.end(); ++it)
+        	{
         		GsmTask* pTask = it->second;
         		string taskStr;
         		pTask->print(taskStr);
         		ImGui::TextWrapped(taskStr.c_str());
+                if (ImGui::Button("Activate")) {
+                	_this->onButtonPushActivateTask(pTask);
+                }
+                ImGui::SameLine();
+                std::string taskStatus;
+                pTask->getStatus(taskStatus);
+                std::string status = "   Status=" + taskStatus;
+                ImGui::Text(status.c_str());
         		ImGui::Separator();
         	}
         }
-        else {
+        else
+        {
         	ImGui::TextWrapped("No tasks are defined.");
         }
-
-#if 0
-        if (httpTxn.rsp.data[0] != '\0') {
-        	ImGui::Text("Task List");
-        	string tasks = httpTxn.rsp.data;
-        	ImGui::TextWrapped(tasks.c_str());
-        }
-        else {
-        	ImGui::TextWrapped("No tasks are defined.");
-        }
-#endif
 
         ImGui::Spacing();
-//        if (ImGui::Button("Refresh Tasks", ImVec2(menuColumnWidth, 0))) {
 
         if (ImGui::Button("Refresh Tasks")) {
         	// confirm that web-server is configured
-        	if (config.conf["web-server"].is_null() == true) {
-        		ImGui::Text("Web server not configure!!");
+        	if (gConfig.conf["web-server"].is_null() == true) {
+        		ImGui::Text("Web server not configured!!");
         	} else {
-    			_this->handleRefreshTasksReq();
+    			_this->onButtonPushRefreshTasks();
         	}
         }
         ImGui::SameLine();
         if (ImGui::Button("Clear Tasks")) {
-        	memset(httpTxn.rsp.data, 0, GSM_MAX_HTTP_DATA_SIZE);
-            spdlog::info("GsManagerModule::menuHandler: cleared tasks");
+        	_this->onButtonPushClearTasks();
         }
 
-        // Check if HTTP response has been received
-        // TODO: need better mechanism
-        _this->handleHttpRsp();
+        // Satellites Section
+        textWidth   = ImGui::CalcTextSize("Satellites").x;
+        ImGui::Separator();
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text("Satellites");
+        ImGui::Separator();
+
+        std::map<string, GsmSatellite*> satellites;
+        GroundStationMgr::getInstance()->getSatellites(satellites);
+
+        if (!satellites.empty())
+        {
+        	std::map<string,GsmSatellite*>::iterator it;
+        	for (it = satellites.begin(); it != satellites.end(); ++it)
+        	{
+        		GsmSatellite* pSatellite = it->second;
+        		string satelliteStr;
+        		pSatellite->print(satelliteStr);
+        		ImGui::TextWrapped(satelliteStr.c_str());
+
+                if (ImGui::Button("Track"))
+                {
+                    spdlog::info("GsManagerModule::menuHandler: track");
+                	_this->onButtonPushTrackSatellite(pSatellite);
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Get Position"))
+                {
+                    spdlog::info("GsManagerModule::menuHandler: position");
+                	_this->onButtonPushGetSatellitePos(pSatellite);
+                }
+
+                ImGui::SameLine();
+                std::string az;
+                pSatellite->getAzimuth(az);
+                std::string el;
+                pSatellite->getElevation(el);
+                std::string position = "   Azimuth=" + az + ", Elevation=" + el;
+                ImGui::Text(position.c_str());
+        		ImGui::Separator();
+        	}
+        }
+        else
+        {
+        	ImGui::TextWrapped("No tasks are available.");
+        }
     }
 
     std::string name;
     bool enabled = true;
-
-    std::map<string, GsmTask*> mTasks;
 
 };
 

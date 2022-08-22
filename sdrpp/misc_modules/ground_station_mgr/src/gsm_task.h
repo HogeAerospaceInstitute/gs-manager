@@ -1,8 +1,21 @@
-/*
- * gsm_task.h
+/* -----------------------------------------------------------------------------
+ * Copyright (C) 2022, Hoge Aerospace Institute
+ * This software is the confidential and proprietary information of the
+ * Hoge Aerospace Institute.
  *
- *  Created on: Jun 27, 2022
- *      Author: jrenkema
+ * ALL RIGHTS RESERVED
+ *
+ * Permission is hereby granted to licensees of Hoge Aerospace Institute
+ * products to use or abstract this computer program for the sole purpose of
+ * implementing a product based on Hoge Aerospace Institute products.  No
+ * other rights to reproduce, use, or disseminate this computer program,
+ * whether in part or in whole, are granted.
+ *
+ * Hoge Aerospace Institute makes no representation or warranties with respect
+ * to the performance of this computer program, and specifically disclaims any
+ * responsibility for any damages, special or consequential, connected with
+ * the use of this program.
+ * -----------------------------------------------------------------------------
  */
 
 #ifndef _GSM_TASK_H_
@@ -28,9 +41,11 @@ class GsmTask
 			mStartTime = 0;
 			mEndTime = 0;
 			mFrequency = 0;
+			mStatus = "Idle";
 		}
 
-		virtual ~GsmTask() {}
+		virtual ~GsmTask() 		{}
+
 
 		/**
 		 * Initializes the task from a string input
@@ -50,7 +65,8 @@ class GsmTask
 			// convert start time
 			string startTime = task["time_start"];
 			if (strptime(startTime.c_str(), "%Y-%m-%dT%H:%M:%S", &tm) == NULL) {
-				spdlog::error("GsmTask::init: failed to convert start-time={0}...", startTime.c_str());
+				spdlog::error("GsmTask::init: failed to convert start-time={0}...",
+						startTime.c_str());
 			}
 			else {
 				mStartTime = mktime(&tm);
@@ -58,10 +74,13 @@ class GsmTask
 
 			// convert end time
 			string endTime = task["time_end"];
-			if (strptime(endTime.c_str(), "%Y-%m-%dT%H:%M:%S", &tm) == NULL) {
-				spdlog::error("GsmTask::init: failed to convert end-time={0}...", endTime.c_str());
+			if (strptime(endTime.c_str(), "%Y-%m-%dT%H:%M:%S", &tm) == NULL)
+			{
+				spdlog::error("GsmTask::init: failed to convert end-time={0}...",
+						endTime.c_str());
 			}
-			else {
+			else
+			{
 				mEndTime = mktime(&tm);
 			}
 
@@ -80,7 +99,7 @@ class GsmTask
 			timeinfo = localtime(&mStartTime);
 			strftime(startTimeBuf,80,"%d %b %Y %H:%M:%S",timeinfo);
 
-			timeinfo = localtime(&mStartTime);
+			timeinfo = localtime(&mEndTime);
 			strftime(endTimeBuf,80,"%d %b %Y %H:%M:%S",timeinfo);
 
 			buffer << "Id=" << mUUID << "\n" << "    tle=" << mTLE
@@ -91,6 +110,18 @@ class GsmTask
 
 		void getUuid(string& _uuid) {
 			_uuid = mUUID;
+		}
+
+		void getTLE(string& _tle) {
+			_tle = mTLE;
+		}
+
+		void getStatus(string& _status) {
+			_status = mStatus;
+		}
+
+		void setStatus(string& _status) {
+			mStatus = _status;
 		}
 
 
@@ -104,6 +135,7 @@ class GsmTask
 
 		double mFrequency;
 
+		string mStatus;
 
 };
 
