@@ -68,7 +68,7 @@ GsmResult_e GsmRotatorController::onMessage(GsmMsg* _msg)
 		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_REQ:
 		{
-			result = handleGetSatellitePosReq(_msg);
+			result = handleGetSatellitePosReq(dynamic_cast<GsmMsgGetSatellitePosReq*>(_msg));
 			break;
 		}
 		case GSM_MSG_TYPE_RELOAD_PREDICT_DB_REQ:
@@ -120,16 +120,18 @@ GsmResult_e GsmRotatorController::handleTrackSatelliteReq(GsmMsg* _msg)
 }
 
 
-GsmResult_e GsmRotatorController::handleGetSatellitePosReq(GsmMsg* _msg)
+GsmResult_e GsmRotatorController::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg)
 {
+	std::string satelliteName;
+	std::string command;
 	std::string rsp;
 
-	spdlog::info("GsmRotatorController::handleGetSatellitePosReq: entered...");
+	_msg->getSatelliteName(satelliteName);
 
-	// TODO: read info from message
+	spdlog::info("GsmRotatorController::handleGetSatellitePosReq: satellite={0}",
+			satelliteName.c_str());
 
-	std::string command = "GET_SAT_POS ISS";
-	//std::string command = "GET_VERSION";
+	command = "GET_SAT_POS " + satelliteName;
 
 	// send message to predict
 	if (sendCommand(command.c_str(), rsp) != GSM_SUCCESS)
@@ -149,7 +151,6 @@ GsmResult_e GsmRotatorController::handleGetSatellitePosReq(GsmMsg* _msg)
 
     spdlog::info("GsmRotatorController::sendCommand: az={0}, el={1}",
     			  az.c_str(), el.c_str());
-
 
     // send response
 	GsmMsg* pMsg = new GsmMsg();
@@ -247,6 +248,14 @@ GsmResult_e GsmRotatorController::sendCommand(const std::string& _cmd,
 
     memset(rspBuf, 0, 1024);
     valread = read(socketFd, rspBuf, 1024);
+
+    if (valread == -1)
+    {
+    	spdlog::error("GsmRotatorController::sendCommand: read failed, errno={0}!!",
+    				  strerror(errno));
+	    close(socketFd);
+		return GSM_FAILURE;
+    }
 
     spdlog::info("GsmRotatorController::sendCommand: rsp={0}, result={1}",
     			  rspBuf, strerror(errno));

@@ -117,7 +117,7 @@ GsmResult_e GsmHttpClient::handleRefreshTasksReq(GsmMsg* _msg)
 	mHttpTxn.req.method = "GET";
  	std::string webServer = gConfig.conf["web-server"];
  	std::string groundStationId = gConfig.conf["ground-station-id"];
- 	mHttpTxn.req.url = "https://" + webServer + "/api/ground_stations/" + groundStationId + "/tasks";
+ 	mHttpTxn.req.url = "https://" + webServer + "/api/v1/ground_stations/" + groundStationId + "/tasks";
 
  	init(mHttpTxn);
  	send();

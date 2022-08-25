@@ -86,6 +86,14 @@ public:
         std::string http = "HTTPCLIENT";
         GsmCommMgr::getInstance()->registerConsumer(http,
         		(GsmCommConsumer*)GsmHttpClient::getInstance());
+
+        // send start message to manager
+		GsmMsg* pMsg = new GsmMsg();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_START);
+		pMsg->setCategory(GsmMsg::GMS_MSG_CAT_COMM);
+
+		GsmCommMgr::getInstance()->sendMsg(pMsg);
     }
 
     void enable() {
@@ -138,6 +146,23 @@ private:
 		GsmMsgActivateTaskReq* pMsg = new GsmMsgActivateTaskReq();
 		pMsg->setDestination("GSMGR");
 		pMsg->setType(GSM_MSG_TYPE_ACTIVATE_TASK_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+		std::string taskId;
+		_task->getUuid(taskId);
+		pMsg->setTaskId(taskId);
+
+    	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
+
+	}
+
+	void onButtonPushDeactivateTask(GsmTask* _task)
+	{
+		spdlog::info("GsManagerModule::onButtonPushDeactivateTask: entered");
+
+		GsmMsgDeactivateTaskReq* pMsg = new GsmMsgDeactivateTaskReq();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_DEACTIVATE_TASK_REQ);
 		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 
 		std::string taskId;
@@ -267,12 +292,25 @@ private:
         		string taskStr;
         		pTask->print(taskStr);
         		ImGui::TextWrapped(taskStr.c_str());
-                if (ImGui::Button("Activate")) {
-                	_this->onButtonPushActivateTask(pTask);
-                }
-                ImGui::SameLine();
+
                 std::string taskStatus;
                 pTask->getStatus(taskStatus);
+                if (taskStatus != "Activated")
+                {
+                	if (ImGui::Button("Activate"))
+                	{
+                		_this->onButtonPushActivateTask(pTask);
+                	}
+                }
+                else
+                {
+                	if (ImGui::Button("Deactivate"))
+                	{
+                		_this->onButtonPushDeactivateTask(pTask);
+                	}
+                }
+                ImGui::SameLine();
+
                 std::string status = "   Status=" + taskStatus;
                 ImGui::Text(status.c_str());
         		ImGui::Separator();
@@ -343,7 +381,7 @@ private:
         }
         else
         {
-        	ImGui::TextWrapped("No tasks are available.");
+        	ImGui::TextWrapped("No satellites are available.");
         }
     }
 

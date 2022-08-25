@@ -124,6 +124,32 @@ class GsmMsgActivateTaskReq : public GsmMsg
 };
 
 
+class GsmMsgDeactivateTaskReq : public GsmMsg
+{
+	public:
+
+		GsmMsgDeactivateTaskReq() {}
+		virtual ~GsmMsgDeactivateTaskReq() {}
+
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+
+	private:
+
+		std::string mTaskId;
+
+};
+
+
 class GsmMsgTrackSatelliteReq : public GsmMsg
 {
 	public:

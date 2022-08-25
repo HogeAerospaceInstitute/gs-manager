@@ -87,6 +87,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleActivateTaskReq(dynamic_cast<GsmMsgActivateTaskReq*>(_msg));
 			break;
 		}
+		case GSM_MSG_TYPE_DEACTIVATE_TASK_REQ:
+		{
+			result = handleDeactivateTaskReq(dynamic_cast<GsmMsgDeactivateTaskReq*>(_msg));
+			break;
+		}
 		case GSM_MSG_TYPE_TRACK_SATELLITE_REQ:
 		{
 			result = handleTrackSatelliteReq(_msg);
@@ -94,7 +99,7 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_REQ:
 		{
-			result = handleGetSatellitePosReq(_msg);
+			result = handleGetSatellitePosReq(dynamic_cast<GsmMsgGetSatellitePosReq*>(_msg));
 			break;
 		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_RSP:
@@ -115,10 +120,45 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 
 GsmResult_e GroundStationMgr::onStart()
 {
-	spdlog::info("GroundStationMgr::onStart: entered...");
+	json tasks;
 
-	// TODO read existing task data from local data file
+	spdlog::info("GroundStationMgr::onStart: reading cached tasks...");
 
+	std::ifstream ifs("/var/run/hai/gsm/tasks.dat");
+
+	try
+	{
+		tasks = json::parse(ifs);
+	}
+	catch (json::parse_error& ex)
+	{
+		spdlog::warn("GroundStationMgr::onStart: failed to parse cached file!");
+		return GSM_FAILURE;
+	}
+
+	for (const auto& item : tasks.items())
+	{
+	  	std::stringstream buffer;
+	   	string tmpStr;
+	   	buffer << item.value();
+	   	tmpStr = buffer.str();
+       	spdlog::info("GroundStationMgr::onStart: item={0}", tmpStr.c_str());
+
+       	// allocate GsmTask
+		GsmTask* pTask = new GsmTask;
+
+		// fill in parameters
+		pTask->init(tmpStr);
+
+		string uuidStr;
+		pTask->getUuid(uuidStr);
+		mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
+
+		// Check and create satellite object
+		string tle;
+		pTask->getTLE(tle);
+		addSatellite(tle);
+    }
 
 	return GSM_SUCCESS;
 }
@@ -147,14 +187,24 @@ GsmResult_e GroundStationMgr::handleRefreshTasksReq(GsmMsg* _msg)
 
 GsmResult_e GroundStationMgr::handleRefreshTasksRsp(GsmMsg* _msg)
 {
+	json tasks;
+
 	spdlog::info("GroundStationMgr::handleRefreshTasksRsp: entered...");
 
 	std::string tasksStr = _msg->getData();
 
-	spdlog::info("GroundStationMgr::handleRefreshTasksRsp: tasks={0}", tasksStr.c_str());
+	spdlog::info("GroundStationMgr::handleRefreshTasksRsp: tasks={0}",
+				 tasksStr.c_str());
 
-	// parse into json object
-	json tasks = json::parse(tasksStr);
+	try
+	{
+		tasks = json::parse(tasksStr);
+	}
+	catch (json::parse_error& ex)
+	{
+		spdlog::warn("GroundStationMgr::handleRefreshTasksRsp: failed to parse rsp");
+		return GSM_FAILURE;
+	}
 
 	for (const auto& item : tasks.items())
 	{
@@ -162,7 +212,8 @@ GsmResult_e GroundStationMgr::handleRefreshTasksRsp(GsmMsg* _msg)
 	   	string tmpStr;
 	   	buffer << item.value();
 	   	tmpStr = buffer.str();
-       	spdlog::info("GroundStationMgr::handleHttpRsp: item={0}", tmpStr.c_str());
+       	spdlog::info("GroundStationMgr::handleRefreshTasksRsp: item={0}",
+       				  tmpStr.c_str());
 
        	// allocate GsmTask
 		GsmTask* pTask = new GsmTask;
@@ -244,6 +295,71 @@ GsmResult_e GroundStationMgr::handleActivateTaskReq(GsmMsgActivateTaskReq* _msg)
 
 	// TODO: implement task state machine
 
+	// Step 1 - tell predict to track satellite
+
+	// Step 2 - get position from satellite
+
+	// Step 3 - control rotator
+
+	// Step 4 - get rotator position until in expected position
+
+	// Step 5 - start RTL SDR
+
+	// Step 6 - record data
+
+	// Step 7 - post data to web-server
+
+
+
+	return GSM_SUCCESS;
+}
+
+
+GsmResult_e GroundStationMgr::handleDeactivateTaskReq(GsmMsgDeactivateTaskReq* _msg)
+{
+	GsmTask* pTask = NULL;
+
+	spdlog::info("GroundStationMgr::handleDeactivateTaskReq: entered...");
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleDeactivateTaskReq: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	std::string taskId;
+	_msg->getTaskId(taskId);
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		std::string status = "Idle";
+		pTask->setStatus(status);
+	}
+
+	// TODO: stop recording
+
 	return GSM_SUCCESS;
 }
 
@@ -296,18 +412,21 @@ GsmResult_e GroundStationMgr::handleTrackSatelliteReq(GsmMsg* _msg)
 }
 
 
-GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsg* _msg)
+GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg)
 {
-	spdlog::info("GroundStationMgr::handleGetSatellitePosReq: entered...");
+	std::string satelliteName;
 
+	_msg->getSatelliteName(satelliteName);
 
-	GsmMsg* pMsg = new GsmMsg();
+	spdlog::info("GroundStationMgr::handleGetSatellitePosReq: satellite={0}",
+			satelliteName.c_str());
 
-	// TODO: fill in sat name from message
+	GsmMsgGetSatellitePosReq* pMsg = new GsmMsgGetSatellitePosReq();
 
 	pMsg->setDestination("ROTCTRL");
 	pMsg->setType(GSM_MSG_TYPE_GET_SATELLITE_POS_REQ);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setSatelliteName(satelliteName);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 

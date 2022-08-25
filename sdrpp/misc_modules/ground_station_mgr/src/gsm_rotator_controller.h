@@ -67,7 +67,7 @@ class GsmRotatorController : public GsmCommConsumer
 
 
 		GsmResult_e handleTrackSatelliteReq(GsmMsg* _msg);
-		GsmResult_e handleGetSatellitePosReq(GsmMsg* _msg);
+		GsmResult_e handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg);
 		GsmResult_e handleReloadPredictDbReq(GsmMsg* _msg);
 
 		GsmResult_e sendCommand(const std::string& _cmd,
