@@ -36,6 +36,7 @@
 #include "gsm_rotator_controller.h"
 #include "gsm_comm_mgr.h"
 #include "ground_station_mgr.h"
+#include "gsm_timer_mgr.h"
 
 
 #define CONCAT(a, b) ((std::string(a) + b).c_str())
@@ -68,13 +69,16 @@ public:
     void postInit() {
         spdlog::info("GsManagerModule::postInit");
 
+        // Initialize messaging service
         GsmCommMgr::getInstance()->init();
 
-        // Create and start services
+        // Start timer service
+        GsmTimerMgr::getInstance()->start();
+
+        // Start application services
         GsmRotatorController::getInstance()->start();
         GroundStationMgr::getInstance()->start();
         GsmHttpClient::getInstance()->start();
-        //GsmTimerMgr::getInstance()->start();
 
         // Register services with inter-thread communication manager
         std::string rot = "ROTCTRL";
