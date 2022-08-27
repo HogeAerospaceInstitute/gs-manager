@@ -202,4 +202,30 @@ class GsmMsgGetSatellitePosReq : public GsmMsg
 };
 
 
+class GsmMsgGetSatellitePosRsp : public GsmMsg
+{
+	public:
+
+		GsmMsgGetSatellitePosRsp() {}
+		virtual ~GsmMsgGetSatellitePosRsp() {}
+
+
+		void setSatelliteName(const std::string& _name)
+		{
+			mSatelliteName = _name;
+		}
+
+		void getSatelliteName(std::string& _name)
+		{
+			_name = mSatelliteName;
+		}
+
+
+	private:
+
+		std::string mSatelliteName;
+
+};
+
+
 #endif

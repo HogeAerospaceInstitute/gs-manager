@@ -153,13 +153,12 @@ GsmResult_e GsmRotatorController::handleGetSatellitePosReq(GsmMsgGetSatellitePos
     			  az.c_str(), el.c_str());
 
     // send response
-	GsmMsg* pMsg = new GsmMsg();
-
-	// TODO: fill in sat name from message
+    GsmMsgGetSatellitePosRsp* pMsg = new GsmMsgGetSatellitePosRsp();
 
 	pMsg->setDestination("GSMGR");
 	pMsg->setType(GSM_MSG_TYPE_GET_SATELLITE_POS_RSP);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->getSatelliteName(satelliteName);
 
 	pMsg->setData((char*)rsp.c_str(), (int)rsp.size());
 	GsmCommMgr::getInstance()->sendMsg(pMsg);

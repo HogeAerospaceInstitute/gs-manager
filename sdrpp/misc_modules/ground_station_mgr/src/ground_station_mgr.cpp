@@ -104,7 +104,7 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_RSP:
 		{
-			result = handleGetSatellitePosRsp(_msg);
+			result = handleGetSatellitePosRsp(dynamic_cast<GsmMsgGetSatellitePosRsp*>(_msg));
 			break;
 		}
 		default:
@@ -228,6 +228,40 @@ GsmResult_e GroundStationMgr::handleRefreshTasksRsp(GsmMsg* _msg)
 		// Check and create satellite object
 		string tle;
 		pTask->getTLE(tle);
+
+		// DEBUG code do not commit
+		// tle = "ISS (ZARYA)\r\n1 44713C 19074A   22087.43454506 -.00034486  00000-0 -23100-2 0   873\r\n2 44713  53.0526 181.1476 0001373  69.1389  60.3646 15.06442553    11";
+
+		// parse TLE
+	    std::vector<std::string> lines;
+
+	    std::stringstream ss(tle);
+	    std::string line;
+	    while (std::getline(ss, line, '\n')) {
+	    	lines.push_back(line);
+	    }
+
+	    if (lines.size() != 3)
+	    {
+	       	spdlog::warn("GroundStationMgr::handleRefreshTasksRsp: tle does not have title!");
+	    }
+	    else
+	    {
+	    	// only use first word of title line for satellite name
+	    	std::string titleLine = lines[0];
+	       	spdlog::info("GroundStationMgr::handleRefreshTasksRsp: title={0}", titleLine.c_str());
+
+	       	std::string newtitle = titleLine.substr(0, titleLine.find(" "));
+	       	newtitle = newtitle + "\r\n";
+
+	       	std::string newtle;
+	       	lines[0] = newtitle;
+
+	       	newtle = lines[0] + lines[1] + lines[2];
+	       	spdlog::info("GroundStationMgr::handleRefreshTasksRsp: new-tle={0}", newtle.c_str());
+	       	tle = newtle;
+	    }
+
 		addSatellite(tle);
     }
 
@@ -434,9 +468,10 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq*
 }
 
 
-GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsg* _msg)
+GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp* _msg)
 {
 	GsmSatellite* pSatellite = NULL;
+	std::string satelliteName;
 
 	spdlog::info("GroundStationMgr::handleGetSatellitePosRsp: entered...");
 
@@ -452,7 +487,7 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsg* _msg)
 
 
 	// TODO: get satellite name from message
-    std::string satelliteName = "ISS";
+    _msg->getSatelliteName(satelliteName);
 
 	// send message to predict to reload TLE db
 
@@ -483,12 +518,11 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsg* _msg)
 }
 
 
-
 GsmResult_e GroundStationMgr::writeTasksToFile(json& _tasks)
 {
 	spdlog::info("GroundStationMgr::writeTasksToFile: entered...");
 
-	std::ofstream file("/var/run/hai/gsm/tasks.dat");
+	std::ofstream file("/var/opt/hai/gsm/tasks.dat");
 	file << _tasks;
 	file.flush();
 
@@ -500,7 +534,8 @@ GsmResult_e GroundStationMgr::writeTLEToPredictDb(const std::string& _tle)
 {
 	spdlog::info("GroundStationMgr::writeTLEToPredictDb: entered...");
 
-	std::ofstream file("/home/jrenkema/.predict/predict.tle");
+	// TODO: make file location configurable
+	std::ofstream file("/var/opt/hai/gsm/.predict/predict.tle");
 	file << _tle;
 	file.flush();
 
