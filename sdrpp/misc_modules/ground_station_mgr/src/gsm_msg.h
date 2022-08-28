@@ -92,7 +92,7 @@ private:
 
 	std::string mDestination;
 
-	char mData[GSM_MAX_MSG_DATA_SIZE];
+	char mData[GSM_MAX_MSG_DATA_SIZE+1];
 
 };
 
