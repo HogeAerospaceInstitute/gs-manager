@@ -216,7 +216,8 @@ private:
     	GsManagerModule* _this = (GsManagerModule*)ctx;
         auto windowWidth = ImGui::GetWindowSize().x;
         float menuColumnWidth = ImGui::GetContentRegionAvailWidth();
-        char inputBuf[256];
+#define GSM_MAX_INPUT_BUFFER_SIZE	1024
+        char inputBuf[GSM_MAX_INPUT_BUFFER_SIZE+1];
 
         // Configuration Section
         auto textWidth   = ImGui::CalcTextSize("Configuration").x;
@@ -226,7 +227,7 @@ private:
         ImGui::Separator();
 
         // Configure ground-station-id
-        memset(inputBuf, 0, 256);
+        memset(inputBuf, 0, GSM_MAX_INPUT_BUFFER_SIZE+1);
         if (gConfig.conf["ground-station-id"].is_null() == true) {
             spdlog::info("GsManagerModule::menuHandler: set ground-station to default");
             gConfig.acquire();
@@ -234,10 +235,10 @@ private:
             gConfig.release(true);
         }
         std::string groundStationId = gConfig.conf["ground-station-id"];
-        std::strncpy(inputBuf, groundStationId.c_str(), 256);
-        inputBuf[256] = '\0';
+        std::strncpy(inputBuf, groundStationId.c_str(), GSM_MAX_INPUT_BUFFER_SIZE);
+        inputBuf[GSM_MAX_INPUT_BUFFER_SIZE] = '\0';
         ImGui::LeftLabel("Ground Station Id");
-        if (ImGui::InputText("##Ground Station Id", inputBuf, 256)) {
+        if (ImGui::InputText("##Ground Station Id", inputBuf, GSM_MAX_INPUT_BUFFER_SIZE)) {
             spdlog::info("GsManagerModule::menuHandler: set ground-station-id={0}",
             			  inputBuf);
             gConfig.acquire();
@@ -246,7 +247,7 @@ private:
         }
 
         // Configure web-server
-        memset(inputBuf, 0, 256);
+        memset(inputBuf, 0, GSM_MAX_INPUT_BUFFER_SIZE+1);
         if (!gConfig.conf.contains("web-server")) {
             spdlog::info("GsManagerModule::menuHandler: setting web-server to default");
             gConfig.acquire();
@@ -254,10 +255,10 @@ private:
             gConfig.release(true);
         }
         std::string webServer = gConfig.conf["web-server"];
-        std::strncpy(inputBuf, webServer.c_str(), 256);
-        inputBuf[256] = '\0';
+        std::strncpy(inputBuf, webServer.c_str(), GSM_MAX_INPUT_BUFFER_SIZE);
+        inputBuf[GSM_MAX_INPUT_BUFFER_SIZE] = '\0';
         ImGui::LeftLabel("Web Server");
-        if (ImGui::InputText("##Web Server", inputBuf, 256)) {
+        if (ImGui::InputText("##Web Server", inputBuf, GSM_MAX_INPUT_BUFFER_SIZE)) {
             spdlog::info("GsManagerModule::menuHandler: set web-server={0}",
             			 inputBuf);
             gConfig.acquire();
@@ -266,7 +267,7 @@ private:
         }
 
         // Configure auto-refresh
-        memset(inputBuf, 0, 256);
+        memset(inputBuf, 0, GSM_MAX_INPUT_BUFFER_SIZE+1);
         ImGui::LeftLabel("Auto-Refresh Tasks");
         bool autoRefreshEnabled = true;
         if (ImGui::Checkbox("##Auto-Refresh Tasks", &autoRefreshEnabled)) {
