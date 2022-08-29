@@ -18,78 +18,65 @@
  * -----------------------------------------------------------------------------
  */
 
-#ifndef _GSM_TASK_H_
-#define _GSM_TASK_H_
+/*
+ * gsm_event.h
+ *
+ *  Created on: Aug 28, 2022
+ *
+ */
 
-#include <string>
-#include <json.hpp>
+#ifndef _GSM_EVENT_H_
+#define _GSM_EVENT_H_
+
 
 #include "BaseStateMachine.h"
-#include "gsm_event.h"
+
+#include "gsm_globals.h"
+#include "gsm_msg.h"
 
 
-using namespace std;
-using nlohmann::json;
+
+//---------------------- Types/Macros ---------------------------------
+typedef enum GsmFSMEventId
+{
+	GSM_FSM_EVENT_ID_INVALID = 0,
+	GSM_FSM_EVENT_ID_ACTIVATE_TASK,
+	GSM_FSM_EVENT_ID_TRACKING_RSP,
+	GSM_FSM_EVENT_ID_GET_POS_RSP,
+	GSM_FSM_EVENT_ID_MAX
+} GsmFSMEventId_e;
 
 
-class GsmTask
+
+class GsmEvent : public BaseEvent
 {
 
 	public:
 
-		/**
-		 * Default constructor
-		 */
-		GsmTask();
-		virtual ~GsmTask() 		{}
+		GsmEvent();
+		GsmEvent( const GsmMsg& _msg );
+
+		virtual ~GsmEvent() {}
+
+		GsmResult_e init( const GsmMsg& _msg );
 
 
-	public:
+		void* getData() const { return mData; }
+		void setData( void* _data ) { mData = _data; }
 
-		typedef BaseFSM<GsmTask> GsmTaskFSM_t;
-
-		GsmFSMResult_e onEvent(const GsmEvent& _event);
-
-		unsigned int getCurrentStateId() const
-							{ return mTaskFSM.getCurrentState()->getId(); }
-
-		const BaseState<GsmTask>* getCurrentState() const
-							{ return mTaskFSM.getCurrentState(); }
-
-
-		void init(const string& _task);
-		void print(string& _out);
-
-		void getUuid(string& _uuid) const {
-			_uuid = mUUID;
-		}
-
-		void getTLE(string& _tle) const {
-			_tle = mTLE;
-		}
-
-		void getStatus(string& _status) const {
-			_status = mStatus;
-		}
-
-		void setStatus(string& _status) {
-			mStatus = _status;
-		}
+		GsmMsg* getMsg() const { return (GsmMsg*)mData; }
 
 
 	private:
 
-		string mUUID;
-		string mTLE;
+		const char* convertEventIdToStr(GsmFSMEventId_e _id);
+		GsmFSMEventId_e convertMsgTypeToEventId(int _msgType);
 
-		time_t mStartTime;
-		time_t mEndTime;
 
-		double mFrequency;
+	private:
 
-		string mStatus;
+		void* mData;
 
-		GsmTaskFSM_t mTaskFSM;
 
 };
 

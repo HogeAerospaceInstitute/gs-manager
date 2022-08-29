@@ -18,39 +18,43 @@
  * -----------------------------------------------------------------------------
  */
 
-#ifndef _GSM_GLOBALS_H_
-#define _GSM_GLOBALS_H_
+/*
+ * gsm_task_state_inactive.h
+ *
+ *  Created on: Aug 28, 2022
+ *
+ */
+
+#ifndef _GSM_TASK_STATE_WFTRACKINGRSP_H_
+#define _GSM_TASK_STATE_WFTRACKINGRSP_H_
 
 
-typedef enum GsmResult
+#include "gsm_task.h"
+#include "gsm_task_state_base.h"
+
+
+
+class GsmTaskStateWfTrackingRsp : public GsmTaskStateBase
 {
-	GSM_SUCCESS = 0,
-	GSM_FAILURE,
-	GSM_MSG_CACHED
-} GsmResult_e;
+	public:
+
+		GsmTaskStateWfTrackingRsp()
+			: GsmTaskStateBase(GSM_TASK_STATE_WF_TRACKING_RSP,
+							   "GSM_TASK_STATE_WF_TRACING_RSP" )  {}
+
+		virtual ~GsmTaskStateWfTrackingRsp() {}
 
 
-typedef enum GsmFSMResult
-{
-	GSM_FSM_SUCCESS = 0,
-	GSM_FSM_FAILURE
-} GsmFSMResult_e;
+		virtual GsmFSMResult_e onTrackingRsp(GsmTask& _task,
+										  GsmTask::GsmTaskFSM_t& _fsm,
+									      const GsmEvent& _event ) const;
+
+
+	private:
 
 
 
-// Message types
-#define GSM_MSG_TYPE_START 					0x10
-#define GSM_MSG_TYPE_SHUTDOWN				0x11
-#define GSM_MSG_TYPE_GET_SATELLITE_POS_REQ  0x12
-#define GSM_MSG_TYPE_GET_SATELLITE_POS_RSP  0x13
-#define GSM_MSG_TYPE_TRACK_SATELLITE_REQ	0x14
-#define GSM_MSG_TYPE_TRACK_SATELLITE_RSP	0x15
-#define GSM_MSG_TYPE_REFRESH_TASKS_REQ		0x16
-#define GSM_MSG_TYPE_REFRESH_TASKS_RSP		0x17
-#define GSM_MSG_TYPE_CLEAR_TASKS_REQ		0x18
-#define GSM_MSG_TYPE_ACTIVATE_TASK_REQ		0x19
-#define GSM_MSG_TYPE_RELOAD_PREDICT_DB_REQ	0x1A
-#define GSM_MSG_TYPE_RELOAD_PREDICT_DB_RSP	0x1B
-#define GSM_MSG_TYPE_DEACTIVATE_TASK_REQ    0x1C
+};
 
-#endif
+
+#endif /* _GSM_TASK_STATE_WFTRACKINGRSP_H_ */

@@ -28,6 +28,10 @@
 #ifndef _GSM_MSG_H_
 #define _GSM_MSG_H_
 
+#include <stdio.h>
+#include <cstring>
+#include <string>
+
 
 #define GSM_MAX_MSG_DATA_SIZE		4096
 
@@ -55,7 +59,7 @@ public:
 	virtual ~GsmMsg() {}
 
 
-	int getType() { return mType; }
+	int getType() const { return mType; }
 	int getCategory() { return mCategory; }
 	const char* getDestination() { return mDestination.c_str(); }
 
@@ -172,6 +176,43 @@ class GsmMsgTrackSatelliteReq : public GsmMsg
 	private:
 
 		std::string mSatelliteName;
+
+};
+
+
+class GsmMsgTrackSatelliteRsp : public GsmMsg
+{
+	public:
+
+		GsmMsgTrackSatelliteRsp() {}
+		virtual ~GsmMsgTrackSatelliteRsp() {}
+
+
+		void setSatelliteName(const std::string& _name)
+		{
+			mSatelliteName = _name;
+		}
+
+		void getSatelliteName(std::string& _name)
+		{
+			_name = mSatelliteName;
+		}
+
+		void setResult(const std::string& _result)
+		{
+			mResult = _result;
+		}
+
+		void getResult(std::string& _result)
+		{
+			_result = mResult;
+		}
+
+
+	private:
+
+		std::string mSatelliteName;
+		std::string mResult;
 
 };
 

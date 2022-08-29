@@ -94,7 +94,12 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 		}
 		case GSM_MSG_TYPE_TRACK_SATELLITE_REQ:
 		{
-			result = handleTrackSatelliteReq(_msg);
+			result = handleTrackSatelliteReq(dynamic_cast<GsmMsgTrackSatelliteReq*>(_msg));
+			break;
+		}
+		case GSM_MSG_TYPE_TRACK_SATELLITE_RSP:
+		{
+			result = handleTrackSatelliteRsp(dynamic_cast<GsmMsgTrackSatelliteRsp*>(_msg));
 			break;
 		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_REQ:
@@ -327,23 +332,10 @@ GsmResult_e GroundStationMgr::handleActivateTaskReq(GsmMsgActivateTaskReq* _msg)
 		pTask->setStatus(status);
 	}
 
-	// TODO: implement task state machine
-
-	// Step 1 - tell predict to track satellite
-
-	// Step 2 - get position from satellite
-
-	// Step 3 - control rotator
-
-	// Step 4 - get rotator position until in expected position
-
-	// Step 5 - start RTL SDR
-
-	// Step 6 - record data
-
-	// Step 7 - post data to web-server
-
-
+	// Send event to state machine
+	GsmEvent* pEvent = new GsmEvent();
+	pEvent->init(*_msg);
+	pTask->onEvent(*pEvent);
 
 	return GSM_SUCCESS;
 }
@@ -398,15 +390,15 @@ GsmResult_e GroundStationMgr::handleDeactivateTaskReq(GsmMsgDeactivateTaskReq* _
 }
 
 
-GsmResult_e GroundStationMgr::handleTrackSatelliteReq(GsmMsg* _msg)
+GsmResult_e GroundStationMgr::handleTrackSatelliteReq(GsmMsgTrackSatelliteReq* _msg)
 {
 	std::string tle;
+    std::string satelliteName;
 	GsmSatellite* pSatellite = NULL;
 
 	spdlog::info("GroundStationMgr::handleTrackSatelliteReq: entered...");
 
-	// TODO: get satellite name from message
-    std::string satelliteName = "ISS";
+    _msg->getSatelliteName(satelliteName);
 
 	// send message to predict to reload TLE db
 
@@ -441,6 +433,21 @@ GsmResult_e GroundStationMgr::handleTrackSatelliteReq(GsmMsg* _msg)
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
+
+	return GSM_SUCCESS;
+}
+
+
+GsmResult_e GroundStationMgr::handleTrackSatelliteRsp(GsmMsgTrackSatelliteRsp* _msg)
+{
+	spdlog::info("GroundStationMgr::handleTrackSatelliteRsp: entered...");
+
+
+	// TODO get task Id from message
+
+	GsmEvent* pEvent = new GsmEvent();
+	pEvent->init(*_msg);
+//	pTask->onEvent(*pEvent);
 
 	return GSM_SUCCESS;
 }
@@ -485,11 +492,7 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp*
     std::string az = tokens[5];
     std::string el = tokens[4];
 
-
-	// TODO: get satellite name from message
     _msg->getSatelliteName(satelliteName);
-
-	// send message to predict to reload TLE db
 
     // find if satellite exists
     // TODO optimize, put into function

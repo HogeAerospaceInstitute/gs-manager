@@ -82,7 +82,8 @@ class GroundStationMgr : public GsmCommConsumer
 		GsmResult_e handleActivateTaskReq(GsmMsgActivateTaskReq* _msg);
 		GsmResult_e handleDeactivateTaskReq(GsmMsgDeactivateTaskReq* _msg);
 
-		GsmResult_e handleTrackSatelliteReq(GsmMsg* _msg);
+		GsmResult_e handleTrackSatelliteReq(GsmMsgTrackSatelliteReq* _msg);
+		GsmResult_e handleTrackSatelliteRsp(GsmMsgTrackSatelliteRsp* _msg);
 		GsmResult_e handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg);
 		GsmResult_e handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp* _msg);
 
