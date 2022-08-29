@@ -57,7 +57,8 @@ GsmHttpClient::GsmHttpClient() {
 	mTimeout = 10;
 	mCurl = NULL;
 	mName = "HTTPCLIENT";
-	memset(&mHttpTxn, 0, sizeof(mHttpTxn));
+	mHttpTxn.status = GSM_HTTP_TRANSACTION_STATE_NULL;
+	memset(&mHttpTxn.rsp.data, 0, GSM_MAX_HTTP_DATA_SIZE);
 }
 
 
@@ -134,15 +135,16 @@ GsmResult_e GsmHttpClient::handleRefreshTasksReq(GsmMsg* _msg)
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
 	// clear data
-	memset(&mHttpTxn, 0, sizeof(mHttpTxn));
+	memset(&mHttpTxn.rsp.data, 0, GSM_MAX_HTTP_DATA_SIZE);
 
  	spdlog::info("GsmHttpClient::handleRefreshTasksReq: exiting...");
  	return GSM_SUCCESS;
  }
 
 
-int GsmHttpClient::init(GsmHttpTransaction_t& _txn) {
-	CURLcode res;
+int GsmHttpClient::init(GsmHttpTransaction_t& _txn)
+{
+	// CURLcode res;
 
     spdlog::info("GsmHttpClient::init: entered");
 

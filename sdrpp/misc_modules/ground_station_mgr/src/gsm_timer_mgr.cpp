@@ -92,7 +92,8 @@ size_t GsmTimerMgr::AddTimer(GsmTimer* timer)
 	HeapEntry entry;
 	size_t timerId = heap_.size();
 
-	// timer->heapIndex_ = heap_.size();
+	entry.index = heap_.size();
+
     // HeapEntry entry = { timer->expires_, timer };
     // expires_ = interval_ + GsmTimerMgr::GetCurrentMillisecs();
 

@@ -67,7 +67,7 @@ typedef struct GsmHttpResponse {
 
    //body
 #define GSM_MAX_HTTP_DATA_SIZE		4096
-    char data[GSM_MAX_HTTP_DATA_SIZE];
+    char data[GSM_MAX_HTTP_DATA_SIZE+1];
 } GsmHttpResponse_t;
 
 

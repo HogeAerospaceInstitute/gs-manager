@@ -60,7 +60,7 @@ class GsmTimer
 	private:
 
     	TimerType mTimerType;
-    	unsigned int mTimerId;  // heapIndex
+    	int mTimerId;  // heapIndex
 
     	std::string mOwner;
     	int mMsgType;

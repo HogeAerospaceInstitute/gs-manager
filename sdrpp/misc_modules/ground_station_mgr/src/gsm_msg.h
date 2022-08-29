@@ -80,7 +80,7 @@ public:
 			_len = GSM_MAX_MSG_DATA_SIZE;
 		}
 
-		strncpy(mData, _data, _len);
+		strncpy(mData, _data, GSM_MAX_MSG_DATA_SIZE);
 		mData[GSM_MAX_MSG_DATA_SIZE] = '\0';
 	}
 

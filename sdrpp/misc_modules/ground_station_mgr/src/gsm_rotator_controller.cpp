@@ -318,6 +318,14 @@ GsmResult_e GsmRotatorController::sendCommandToRotctld(const std::string& _cmd)
 
     memset(buffer, 0, 1024);
     valread = read(socketFd, buffer, 1024);
+    if (valread == -1)
+    {
+    	spdlog::error("GsmRotatorController::sendCommandToRotctld: read failed, errno={0}!!",
+    				  strerror(errno));
+	    close(socketFd);
+		return GSM_FAILURE;
+    }
+
     spdlog::info("GsmRotatorController::sendCommandToRotctld: response={0}, code={1}",
     		buffer, strerror(errno));
 

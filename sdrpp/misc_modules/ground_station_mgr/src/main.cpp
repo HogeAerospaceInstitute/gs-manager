@@ -215,7 +215,7 @@ private:
     {
     	GsManagerModule* _this = (GsManagerModule*)ctx;
         auto windowWidth = ImGui::GetWindowSize().x;
-        float menuColumnWidth = ImGui::GetContentRegionAvailWidth();
+        // float menuColumnWidth = ImGui::GetContentRegionAvailWidth();
 #define GSM_MAX_INPUT_BUFFER_SIZE	1024
         char inputBuf[GSM_MAX_INPUT_BUFFER_SIZE+1];
 
@@ -267,7 +267,6 @@ private:
         }
 
         // Configure auto-refresh
-        memset(inputBuf, 0, GSM_MAX_INPUT_BUFFER_SIZE+1);
         ImGui::LeftLabel("Auto-Refresh Tasks");
         bool autoRefreshEnabled = true;
         if (ImGui::Checkbox("##Auto-Refresh Tasks", &autoRefreshEnabled)) {
