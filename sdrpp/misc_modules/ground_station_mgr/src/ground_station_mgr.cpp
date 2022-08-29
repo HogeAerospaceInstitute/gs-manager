@@ -112,6 +112,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleGetSatellitePosRsp(dynamic_cast<GsmMsgGetSatellitePosRsp*>(_msg));
 			break;
 		}
+		case GSM_MSG_TYPE_MOVE_ROTATOR_REQ:
+		{
+			result = handleMoveRotatorReq(dynamic_cast<GsmMsgMoveRotatorReq*>(_msg));
+			break;
+		}
 		default:
 		{
 			// error
@@ -473,6 +478,58 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq*
 
 	return GSM_SUCCESS;
 }
+
+
+GsmResult_e GroundStationMgr::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
+{
+	GsmSatellite* pSatellite = NULL;
+	std::string satelliteName;
+	std::string azimuth;
+	std::string elevation;
+
+	_msg->getSatelliteName(satelliteName);
+
+	spdlog::info("GroundStationMgr::handleMoveRotatorReq: satellite={0}",
+			satelliteName.c_str());
+
+    // find if satellite exists
+    // TODO optimize, put into function
+    bool bFound = false;
+	std::map<std::string, GsmSatellite*>::iterator it;
+	for (it = mSatellites.begin(); it != mSatellites.end(); ++it)
+	{
+		pSatellite = it->second;
+
+		std::string satname;
+		pSatellite->getName(satname);
+		int compare = satelliteName.compare(satname);
+		if (compare == 0)
+		{
+			bFound = true;
+		}
+	}
+
+	if (bFound == true)
+	{
+		pSatellite->getName(satelliteName);
+		pSatellite->getAzimuth(azimuth);
+		pSatellite->getElevation(elevation);
+	}
+
+	GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
+
+	pMsg->setDestination("ROTCTRL");
+	pMsg->setType(GSM_MSG_TYPE_MOVE_ROTATOR_REQ);
+	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setSatelliteName(satelliteName);
+	pMsg->setAzimuth(azimuth);
+	pMsg->setElevation(elevation);
+
+	GsmCommMgr::getInstance()->sendMsg(pMsg);
+
+	return GSM_SUCCESS;
+}
+
 
 
 GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp* _msg)

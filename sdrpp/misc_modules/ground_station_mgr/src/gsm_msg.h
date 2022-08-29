@@ -269,4 +269,52 @@ class GsmMsgGetSatellitePosRsp : public GsmMsg
 };
 
 
+class GsmMsgMoveRotatorReq : public GsmMsg
+{
+	public:
+
+		GsmMsgMoveRotatorReq() {}
+		virtual ~GsmMsgMoveRotatorReq() {}
+
+
+		void setSatelliteName(const std::string& _name)
+		{
+			mSatelliteName = _name;
+		}
+
+		void getSatelliteName(std::string& _name)
+		{
+			_name = mSatelliteName;
+		}
+
+		void setAzimuth(const std::string& _azimuth)
+		{
+			mAzimuth = _azimuth;
+		}
+
+		void getAzimuth(std::string& _azimuth)
+		{
+			_azimuth = mAzimuth;
+		}
+
+		void setElevation(const std::string& _elevation)
+		{
+			mElevation = _elevation;
+		}
+
+		void getElevation(std::string& _elevation)
+		{
+			_elevation = mElevation;
+		}
+
+
+	private:
+
+		std::string mSatelliteName;
+		std::string mAzimuth;
+		std::string mElevation;
+
+};
+
+
 #endif

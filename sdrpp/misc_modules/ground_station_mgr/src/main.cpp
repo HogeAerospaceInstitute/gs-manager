@@ -211,6 +211,23 @@ private:
     }
 
 
+    void onButtonPushMoveRotator(GsmSatellite* _satellite)
+    {
+		spdlog::info("GsManagerModule::onButtonPushGetSatellitePos: entered");
+
+		GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_MOVE_ROTATOR_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+		std::string satelliteName;
+		_satellite->getName(satelliteName);
+		pMsg->setSatelliteName(satelliteName);
+
+    	GsmCommMgr::getInstance()->sendMsg(pMsg);
+    }
+
+
     static void menuHandler(void* ctx)
     {
     	GsManagerModule* _this = (GsManagerModule*)ctx;
@@ -380,6 +397,15 @@ private:
                 pSatellite->getElevation(el);
                 std::string position = "   Azimuth=" + az + ", Elevation=" + el;
                 ImGui::Text(position.c_str());
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Move Rotator"))
+                {
+                    spdlog::info("GsManagerModule::menuHandler: move rotator");
+                	_this->onButtonPushMoveRotator(pSatellite);
+                }
+
         		ImGui::Separator();
         	}
         }

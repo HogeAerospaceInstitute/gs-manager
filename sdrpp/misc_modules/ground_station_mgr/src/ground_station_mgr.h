@@ -87,6 +87,7 @@ class GroundStationMgr : public GsmCommConsumer
 		GsmResult_e handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg);
 		GsmResult_e handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp* _msg);
 
+		GsmResult_e handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg);
 
 		GsmResult_e sendCommand(const std::string& _cmd,
 								std::string& _rsp);
