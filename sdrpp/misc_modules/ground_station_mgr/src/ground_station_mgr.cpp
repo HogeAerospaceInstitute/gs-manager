@@ -129,7 +129,7 @@ GsmResult_e GroundStationMgr::onStart()
 
 	spdlog::info("GroundStationMgr::onStart: reading cached tasks...");
 
-	std::ifstream ifs("/var/run/hai/gsm/tasks.dat");
+	std::ifstream ifs("/var/opt/hai/gsm/tasks.dat");
 
 	try
 	{
