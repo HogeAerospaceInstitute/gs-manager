@@ -25,6 +25,7 @@
  *
  */
 
+#include <spdlog/spdlog.h>
 
 #include "gsm_event.h"
 
@@ -40,7 +41,8 @@ GsmEventIdStr_t eventIdStr[GSM_FSM_EVENT_ID_MAX] =
 	{ "INVALID" },
 	{ "ACTIVATE_TASK" },
 	{ "TRACKING_RSP" },
-	{ "GET_POSITION_RSP" }
+	{ "GET_POSITION_RSP" },
+	{ "RELOAD_DB_RSP" }
 };
 
 
@@ -91,10 +93,26 @@ GsmEvent::convertMsgTypeToEventId( int _msgType )
 			id = GSM_FSM_EVENT_ID_GET_POS_RSP;
 			break;
 		}
+		case GSM_MSG_TYPE_RELOAD_PREDICT_DB_RSP:
+		{
+			id = GSM_FSM_EVENT_ID_RELOAD_DB_RSP;
+			break;
+		}
+		case GSM_MSG_TYPE_MOVE_ROTATOR_RSP:
+		{
+			id = GSM_FSM_EVENT_ID_MOVE_ROTATOR_RSP;
+			break;
+		}
+		case GSM_MSG_TYPE_QUERY_ROTATOR_POS_RSP:
+		{
+			id = GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP;
+			break;
+		}
 		default:
 		{
-			//meshLogErr( "::convertMsgTypeToEventId: unknown msgType=0x%x",
-			//			_msgType );
+			spdlog::error("GsmEvent::convertMsgTypeToEventId: unknown msg-type={0}",
+					_msgType);
+
 			break;
 		}
 	}

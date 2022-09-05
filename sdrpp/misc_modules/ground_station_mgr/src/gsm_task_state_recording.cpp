@@ -19,69 +19,50 @@
  */
 
 /*
- * gsm_event.h
+ * gsm_task_state_recording.cpp
  *
  *  Created on: Aug 28, 2022
  *
  */
 
-#ifndef _GSM_EVENT_H_
-#define _GSM_EVENT_H_
+#include <spdlog/spdlog.h>
+
+#include "gsm_task_state_recording.h"
+#include "gsm_comm_mgr.h"
 
 
-#include "BaseStateMachine.h"
-
-#include "gsm_globals.h"
-#include "gsm_msg.h"
-
-
-
-//---------------------- Types/Macros ---------------------------------
-typedef enum GsmFSMEventId
+/*********************************************************************
+ *	Name:	onStopRecording
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateRecording::onStopRecording(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
 {
-	GSM_FSM_EVENT_ID_INVALID = 0,
-	GSM_FSM_EVENT_ID_ACTIVATE_TASK,
-	GSM_FSM_EVENT_ID_TRACKING_RSP,
-	GSM_FSM_EVENT_ID_GET_POS_RSP,
-	GSM_FSM_EVENT_ID_RELOAD_DB_RSP,
-	GSM_FSM_EVENT_ID_MOVE_ROTATOR_RSP,
-	GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP,
-	GSM_FSM_EVENT_ID_MAX
-} GsmFSMEventId_e;
+	std::string tle;
+	std::string satelliteName;
+
+	// GsmMsg* pMsg = _event.getMsg();
+
+	spdlog::info("GsmTaskStateInactive::onStopRecording: entered...");
+
+
+	// TODO: send message to start recording
+
+
+	// TODO start timer
+
+
+	_fsm.setState( (BaseState<GsmTask>*)&mRotatorAlignedState );
+
+	return GSM_FSM_SUCCESS;
+}
 
 
 
-class GsmEvent : public BaseEvent
-{
-
-	public:
-
-		GsmEvent();
-		GsmEvent( const GsmMsg& _msg );
-
-		virtual ~GsmEvent() {}
-
-		GsmResult_e init( const GsmMsg& _msg );
 
 
-		void* getData() const { return mData; }
-		void setData( void* _data ) { mData = _data; }
-
-		GsmMsg* getMsg() const { return (GsmMsg*)mData; }
-
-
-	private:
-
-		const char* convertEventIdToStr(GsmFSMEventId_e _id);
-		GsmFSMEventId_e convertMsgTypeToEventId(int _msgType);
-
-
-	private:
-
-		void* mData;
-
-
-};
-
-
-#endif

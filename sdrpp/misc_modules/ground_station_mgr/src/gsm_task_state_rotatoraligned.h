@@ -19,69 +19,41 @@
  */
 
 /*
- * gsm_event.h
+ * gsm_task_state_rotatoraligned.h
  *
- *  Created on: Aug 28, 2022
- *
+ *  Created on: Sep 3, 2022
+ *      Author: jrenkema
  */
 
-#ifndef _GSM_EVENT_H_
-#define _GSM_EVENT_H_
+#ifndef _GSM_TASK_STATE_ROTATORALIGNED_H_
+#define _GSM_TASK_STATE_ROTATORALIGNED_H_
+
+#include "gsm_task.h"
+#include "gsm_task_state_base.h"
 
 
-#include "BaseStateMachine.h"
-
-#include "gsm_globals.h"
-#include "gsm_msg.h"
-
-
-
-//---------------------- Types/Macros ---------------------------------
-typedef enum GsmFSMEventId
+class GsmTaskStateRotatorAligned : public GsmTaskStateBase
 {
-	GSM_FSM_EVENT_ID_INVALID = 0,
-	GSM_FSM_EVENT_ID_ACTIVATE_TASK,
-	GSM_FSM_EVENT_ID_TRACKING_RSP,
-	GSM_FSM_EVENT_ID_GET_POS_RSP,
-	GSM_FSM_EVENT_ID_RELOAD_DB_RSP,
-	GSM_FSM_EVENT_ID_MOVE_ROTATOR_RSP,
-	GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP,
-	GSM_FSM_EVENT_ID_MAX
-} GsmFSMEventId_e;
-
-
-
-class GsmEvent : public BaseEvent
-{
-
 	public:
 
-		GsmEvent();
-		GsmEvent( const GsmMsg& _msg );
+		GsmTaskStateRotatorAligned()
+			: GsmTaskStateBase( GSM_TASK_STATE_ROTATOR_ALIGNED,
+								   "GSM_TASK_STATE_ROTATOR_ALIGNED" )  {}
 
-		virtual ~GsmEvent() {}
-
-		GsmResult_e init( const GsmMsg& _msg );
+		virtual ~GsmTaskStateRotatorAligned() {}
 
 
-		void* getData() const { return mData; }
-		void setData( void* _data ) { mData = _data; }
-
-		GsmMsg* getMsg() const { return (GsmMsg*)mData; }
+		virtual GsmFSMResult_e onStartRecordingTimeout(GsmTask& _task,
+										  GsmTask::GsmTaskFSM_t& _fsm,
+									      const GsmEvent& _event ) const;
 
 
 	private:
 
-		const char* convertEventIdToStr(GsmFSMEventId_e _id);
-		GsmFSMEventId_e convertMsgTypeToEventId(int _msgType);
-
-
-	private:
-
-		void* mData;
 
 
 };
+
 
 
 #endif

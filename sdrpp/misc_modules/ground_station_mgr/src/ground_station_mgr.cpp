@@ -117,6 +117,21 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleMoveRotatorReq(dynamic_cast<GsmMsgMoveRotatorReq*>(_msg));
 			break;
 		}
+		case GSM_MSG_TYPE_MOVE_ROTATOR_RSP:
+		{
+			result = handleMoveRotatorRsp(dynamic_cast<GsmMsgMoveRotatorRsp*>(_msg));
+			break;
+		}
+		case GSM_MSG_TYPE_RELOAD_PREDICT_DB_RSP:
+		{
+			result = handleReloadPredictDbRsp(dynamic_cast<GsmMsgReloadPredictDbRsp*>(_msg));
+			break;
+		}
+		case GSM_MSG_TYPE_QUERY_ROTATOR_POS_RSP:
+		{
+			result = handleGetRotatorPosRsp(dynamic_cast<GsmMsgGetRotatorPosRsp*>(_msg));
+			break;
+		}
 		default:
 		{
 			// error
@@ -297,6 +312,7 @@ GsmResult_e GroundStationMgr::handleClearTasksReq(GsmMsg* _msg)
 GsmResult_e GroundStationMgr::handleActivateTaskReq(GsmMsgActivateTaskReq* _msg)
 {
 	GsmTask* pTask = NULL;
+	std::string taskId;
 
 	spdlog::info("GroundStationMgr::handleActivateTaskReq: entered...");
 
@@ -306,7 +322,6 @@ GsmResult_e GroundStationMgr::handleActivateTaskReq(GsmMsgActivateTaskReq* _msg)
 		return GSM_FAILURE;
 	}
 
-	std::string taskId;
 	_msg->getTaskId(taskId);
 
 	// TODO: optimize
@@ -462,7 +477,7 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq*
 {
 	std::string satelliteName;
 
-	_msg->getSatelliteName(satelliteName);
+	_msg->getSatellite(satelliteName);
 
 	spdlog::info("GroundStationMgr::handleGetSatellitePosReq: satellite={0}",
 			satelliteName.c_str());
@@ -472,7 +487,7 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq*
 	pMsg->setDestination("ROTCTRL");
 	pMsg->setType(GSM_MSG_TYPE_GET_SATELLITE_POS_REQ);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
-	pMsg->setSatelliteName(satelliteName);
+	pMsg->setSatellite(satelliteName);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
@@ -487,7 +502,7 @@ GsmResult_e GroundStationMgr::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
 	std::string azimuth;
 	std::string elevation;
 
-	_msg->getSatelliteName(satelliteName);
+	_msg->getSatellite(satelliteName);
 
 	spdlog::info("GroundStationMgr::handleMoveRotatorReq: satellite={0}",
 			satelliteName.c_str());
@@ -521,7 +536,7 @@ GsmResult_e GroundStationMgr::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
 	pMsg->setDestination("ROTCTRL");
 	pMsg->setType(GSM_MSG_TYPE_MOVE_ROTATOR_REQ);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
-	pMsg->setSatelliteName(satelliteName);
+	pMsg->setSatellite(satelliteName);
 	pMsg->setAzimuth(azimuth);
 	pMsg->setElevation(elevation);
 
@@ -535,6 +550,7 @@ GsmResult_e GroundStationMgr::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
 GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp* _msg)
 {
 	GsmSatellite* pSatellite = NULL;
+	std::string taskId;
 	std::string satelliteName;
 
 	spdlog::info("GroundStationMgr::handleGetSatellitePosRsp: entered...");
@@ -549,7 +565,8 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp*
     std::string az = tokens[5];
     std::string el = tokens[4];
 
-    _msg->getSatelliteName(satelliteName);
+    _msg->getTaskId(taskId);
+    _msg->getSatellite(satelliteName);
 
     // find if satellite exists
     // TODO optimize, put into function
@@ -574,8 +591,210 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp*
 		pSatellite->setElevation(el);
 	}
 
+	// If taskId exists, then forward to state machine
+	if (!taskId.empty())
+	{
+		GsmTask* pTask = NULL;
+
+		// TODO: optimize
+		bool bFound = false;
+		std::map<string,GsmTask*>::iterator it;
+		for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+			pTask = it->second;
+
+			if (pTask == NULL)
+			{
+				continue;
+			}
+
+			// TODO: get id from message
+			std::string taskUUID;
+			pTask->getUuid(taskUUID);
+			int compare = taskUUID.compare(taskId);
+			if (compare == 0)
+			{
+				bFound = true;
+				break;
+			}
+		}
+
+		if (bFound == true)
+		{
+			std::string status = "Activated";
+			pTask->setStatus(status);
+
+			// Send event to state machine
+			GsmEvent* pEvent = new GsmEvent();
+			pEvent->init(*_msg);
+			pTask->onEvent(*pEvent);
+		}
+		else
+		{
+			spdlog::error("GroundStationMgr::handleGetSatellitePosRsp: task not found={0}",
+					taskId.c_str());
+		}
+	}
+
 	return GSM_SUCCESS;
 }
+
+
+GsmResult_e GroundStationMgr::handleReloadPredictDbRsp(GsmMsgReloadPredictDbRsp* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+	std::string satellite;
+
+	_msg->getTaskId(taskId);
+
+	spdlog::info("GroundStationMgr::handleReloadPredictDbRsp: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleActivateTaskReq: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		std::string status = "Activated";
+		pTask->setStatus(status);
+	}
+
+	// Send event to state machine
+	GsmEvent* pEvent = new GsmEvent();
+	pEvent->init(*_msg);
+	pTask->onEvent(*pEvent);
+
+	return GSM_SUCCESS;
+}
+
+
+GsmResult_e GroundStationMgr::handleMoveRotatorRsp(GsmMsgMoveRotatorRsp* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+	std::string satellite;
+
+	_msg->getTaskId(taskId);
+
+	spdlog::info("GroundStationMgr::handleMoveRotatorRsp: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleMoveRotatorRsp: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
+
+
+
+GsmResult_e GroundStationMgr::handleGetRotatorPosRsp(GsmMsgGetRotatorPosRsp* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+	std::string satellite;
+
+	_msg->getTaskId(taskId);
+
+	spdlog::info("GroundStationMgr::handleGetRotatorPosRsp: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleGetRotatorPosRsp: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
+
 
 
 GsmResult_e GroundStationMgr::writeTasksToFile(json& _tasks)

@@ -25,6 +25,8 @@
  *
  */
 
+#include <sstream>
+
 #include <spdlog/spdlog.h>
 
 #include "gsm_task_state_wftrackingrsp.h"
@@ -39,31 +41,39 @@
  *	Notes:
  *********************************************************************/
 GsmFSMResult_e
-GsmTaskStateWfTrackingRsp::onTrackingRsp(GsmTask& _task,
+GsmTaskStateWfTrackingRsp::onReloadDbRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
+	std::string taskId;
 	std::string tle;
 	std::string satelliteName;
 
-//	GsmMsg* pMsg = _event.getMsg();
+	spdlog::info("GsmTaskStateWfTrackingRsp::onReloadDbRsp: entered...");
 
-	spdlog::info("GsmTaskStateInactive::onActivate: entered...");
-
+	_task.getUuid(taskId);
     _task.getTLE(tle);
+
+	// get the satellite name from the tle
+    // TODO: optimize
+    std::stringstream tleSS(tle);
+    std::istream_iterator<std::string> begin(tleSS);
+    std::istream_iterator<std::string> end;
+    std::vector<std::string> tokens(begin, end);
+    satelliteName = tokens[0];
 
     // get the satellite position from predict.
     GsmMsgGetSatellitePosReq* pMsg = new GsmMsgGetSatellitePosReq();
 	pMsg->setDestination("ROTCTRL");
 	pMsg->setType(GSM_MSG_TYPE_GET_SATELLITE_POS_REQ);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
-
-	// TODO: get the satellite name from the tle
-
+	pMsg->setSatellite(satelliteName);
+	pMsg->setTaskId(taskId);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
 	// TODO start timer
+
 
 	_fsm.setState( (BaseState<GsmTask>*)&mWfGetPosRspState );
 

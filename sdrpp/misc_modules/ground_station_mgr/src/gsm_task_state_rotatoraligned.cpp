@@ -19,42 +19,47 @@
  */
 
 /*
- * gsm_task_state_inactive.h
+ * gsm_task_state_rotatoraligned.cpp
  *
- *  Created on: Aug 28, 2022
+ *  Created on: Sep 3, 2022
  *
  */
 
-#ifndef _GSM_TASK_STATE_WFTRACKINGRSP_H_
-#define _GSM_TASK_STATE_WFTRACKINGRSP_H_
+#include <spdlog/spdlog.h>
+
+#include "gsm_task_state_rotatoraligned.h"
+#include "gsm_comm_mgr.h"
 
 
-#include "gsm_task.h"
-#include "gsm_task_state_base.h"
-
-
-
-class GsmTaskStateWfTrackingRsp : public GsmTaskStateBase
+/*********************************************************************
+ *	Name:	onGetPosRsp
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateRotatorAligned::onStartRecordingTimeout(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
 {
-	public:
+	std::string tle;
+	std::string satelliteName;
 
-		GsmTaskStateWfTrackingRsp()
-			: GsmTaskStateBase(GSM_TASK_STATE_WF_TRACKING_RSP,
-							   "GSM_TASK_STATE_WF_TRACING_RSP" )  {}
+	// GsmMsg* pMsg = _event.getMsg();
 
-		virtual ~GsmTaskStateWfTrackingRsp() {}
-
-
-		virtual GsmFSMResult_e onReloadDbRsp(GsmTask& _task,
-										  GsmTask::GsmTaskFSM_t& _fsm,
-									      const GsmEvent& _event ) const;
+	spdlog::info("GsmTaskStateInactive::onStartRecordingTimeout: entered...");
 
 
-	private:
+	// TODO: send message to start recording
 
 
+	// TODO start timer
 
-};
+
+	_fsm.setState( (BaseState<GsmTask>*)&mRecordingState );
+
+	return GSM_FSM_SUCCESS;
+}
 
 
-#endif /* _GSM_TASK_STATE_WFTRACKINGRSP_H_ */

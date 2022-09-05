@@ -41,10 +41,14 @@ class GsmTimer
 
     	enum TimerType { ONCE, CIRCLE };
 
+    	GsmTimer();
     	GsmTimer(const std::string& _owner, int _msgId);
     	virtual ~GsmTimer();
 
-    	void start(unsigned interval, TimerType timeType = CIRCLE);
+    	void init(const std::string& _owner, int _msgId);
+
+    	void start();
+    	void start(unsigned interval, TimerType timeType = ONCE);
     	void stop();
 
     	void onTimeout();
@@ -53,6 +57,7 @@ class GsmTimer
     	void getOwner(std::string& _owner) {
     		_owner = mOwner;
     	}
+
     	int getMsgType() { return mMsgType; }
 
 
@@ -60,7 +65,7 @@ class GsmTimer
 	private:
 
     	TimerType mTimerType;
-    	int mTimerId;  // heapIndex
+    	int mTimerId;  					// heapIndex
 
     	std::string mOwner;
     	int mMsgType;

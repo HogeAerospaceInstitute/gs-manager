@@ -53,7 +53,7 @@ typedef enum GsmTasktates
 	GSM_TASK_STATE_WF_TRACKING_RSP,
 	GSM_TASK_STATE_WF_GET_POS_RSP,
 	GSM_TASK_STATE_WF_ROTATOR_ALIGNED,
-	GSM_TASK_STATE_ALIGNED,
+	GSM_TASK_STATE_ROTATOR_ALIGNED,
 	GSM_TASK_STATE_RECORDING
 } GsmTaskStates_e;
 
@@ -97,6 +97,18 @@ class GsmTaskStateBase : public BaseState<GsmTask>
 										   GsmTask::GsmTaskFSM_t& _fsm,
 									       const GsmEvent& _event ) const;
 
+		virtual GsmFSMResult_e onReloadDbRsp(GsmTask& _task,
+										     GsmTask::GsmTaskFSM_t& _fsm,
+									         const GsmEvent& _event ) const;
+
+		virtual GsmFSMResult_e onMoveRotatorRsp(GsmTask& _task,
+										     GsmTask::GsmTaskFSM_t& _fsm,
+									         const GsmEvent& _event ) const;
+
+		virtual GsmFSMResult_e onGetRotatorPosRsp(GsmTask& _task,
+										     GsmTask::GsmTaskFSM_t& _fsm,
+									         const GsmEvent& _event ) const;
+
 
 
 	protected:
@@ -104,9 +116,9 @@ class GsmTaskStateBase : public BaseState<GsmTask>
 		static GsmTaskStateInactive mInactiveState;
 		static GsmTaskStateWfTrackingRsp mWfTrackingRspState;
 		static GsmTaskStateWfGetPosRsp mWfGetPosRspState;
-//		static GsmTaskStateWfRotatorAligned mWfRotatorAlignedState;
-//		static GsmTaskStateRotatorAligned mRotatorAlignedState;
-//		static GsmTaskStateRecording mRecordingState;
+		static GsmTaskStateWfRotatorAligned mWfRotatorAlignedState;
+		static GsmTaskStateRotatorAligned mRotatorAlignedState;
+		static GsmTaskStateRecording mRecordingState;
 
 
 };

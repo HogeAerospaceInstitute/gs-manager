@@ -43,35 +43,34 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	std::string tle;
-	std::string satelliteName;
+	std::string taskId;
+	std::string azimuth;
+	std::string elevation;
 
-	GsmMsg* pMsg = _event.getMsg();
+	spdlog::info("GsmTaskStateWfGetPosRsp::onGetPosRsp: entered...");
 
-	spdlog::info("GsmTaskStateInactive::onActivate: entered...");
+	_task.getUuid(taskId);
 
-    _task.getTLE(tle);
+    // Get az/el from response message
+    GsmMsgGetSatellitePosRsp* pRsp = (GsmMsgGetSatellitePosRsp*)_event.getMsg();
+    pRsp->getAzimuth(azimuth);
+    pRsp->getElevation(elevation);
 
     // send message to move rotator
-
-
-
-	//GsmMsg* pMsg = new GsmMsg();
+    GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
 	pMsg->setDestination("ROTCTRL");
-	pMsg->setType(GSM_MSG_TYPE_RELOAD_PREDICT_DB_REQ);
+	pMsg->setType(GSM_MSG_TYPE_MOVE_ROTATOR_REQ);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setTaskId(taskId);
+	pMsg->setAzimuth(azimuth);
+	pMsg->setElevation(elevation);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
 	// TODO start timer
 
-
-	_fsm.setState( (BaseState<GsmTask>*)&mWfTrackingRspState );
+	_fsm.setState( (BaseState<GsmTask>*)&mWfRotatorAlignedState );
 
 	return GSM_FSM_SUCCESS;
 }
-
-
-
-
 

@@ -205,7 +205,7 @@ private:
 
 		std::string satelliteName;
 		_satellite->getName(satelliteName);
-		pMsg->setSatelliteName(satelliteName);
+		pMsg->setSatellite(satelliteName);
 
     	GsmCommMgr::getInstance()->sendMsg(pMsg);
     }
@@ -222,7 +222,7 @@ private:
 
 		std::string satelliteName;
 		_satellite->getName(satelliteName);
-		pMsg->setSatelliteName(satelliteName);
+		pMsg->setSatellite(satelliteName);
 
     	GsmCommMgr::getInstance()->sendMsg(pMsg);
     }

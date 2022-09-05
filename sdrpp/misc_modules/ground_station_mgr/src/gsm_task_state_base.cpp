@@ -26,22 +26,23 @@
  *
  */
 
+#include <spdlog/spdlog.h>
 
 #include "gsm_task_state_base.h"
 #include "gsm_task_state_inactive.h"
 #include "gsm_task_state_wftrackingrsp.h"
 #include "gsm_task_state_wfgetposrsp.h"
-//#include "gsm_task_state_wfrotatoraligned.h"
-//#include "gsm_task_state_rotatoraligned.h"
-//#include "gsm_task_state_recording.h"
+#include "gsm_task_state_wfrotatoraligned.h"
+#include "gsm_task_state_rotatoraligned.h"
+#include "gsm_task_state_recording.h"
 
 
 GsmTaskStateInactive GsmTaskStateBase::mInactiveState;
 GsmTaskStateWfTrackingRsp GsmTaskStateBase::mWfTrackingRspState;
 GsmTaskStateWfGetPosRsp GsmTaskStateBase::mWfGetPosRspState;
-//GsmTaskStateWfRotatorAligned GsmTaskStateBase::mWfRotatorAlignedState;
-//GsmTaskStateRotatorAligned GsmTaskStateBase::mRotatorAlignedState;
-//GsmTaskStateRecording GsmTaskStateBase::mRecordingState;
+GsmTaskStateWfRotatorAligned GsmTaskStateBase::mWfRotatorAlignedState;
+GsmTaskStateRotatorAligned GsmTaskStateBase::mRotatorAlignedState;
+GsmTaskStateRecording GsmTaskStateBase::mRecordingState;
 
 
 
@@ -70,11 +71,25 @@ GsmTaskStateBase::onEvent(GsmTask& _task,
 			result = onGetPosRsp(_task, _fsm, *gsmEvent);
 			break;
 		}
-
+		case GSM_FSM_EVENT_ID_RELOAD_DB_RSP:
+		{
+			result = onReloadDbRsp(_task, _fsm, *gsmEvent);
+			break;
+		}
+		case GSM_FSM_EVENT_ID_MOVE_ROTATOR_RSP:
+		{
+			result = onMoveRotatorRsp(_task, _fsm, *gsmEvent);
+			break;
+		}
+		case GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP:
+		{
+			result = onGetRotatorPosRsp(_task, _fsm, *gsmEvent);
+			break;
+		}
 		default:
 		{
-			// invalid event type
-			//meshLogErr( "::OnEvent: invalid event=%d",	meshEvent->getId() );
+			spdlog::error("GsmTaskStateBase::onEvent: invalid event={0}",
+					_event->getId());
 			break;
 		}
 	}
@@ -86,7 +101,7 @@ GsmTaskStateBase::onEvent(GsmTask& _task,
 void
 GsmTaskStateBase::enter(GsmTask& _task, GsmTask::GsmTaskFSM_t& _fsm )
 {
-	// meshLogDbg( "GwNodeFSM: ENTERING state=%s", getNameStr() );
+	spdlog::info( "GsmTaskFSM: ENTERING state={0}", getNameStr() );
 }
 
 
@@ -94,15 +109,15 @@ void
 GsmTaskStateBase::exit( GsmTask& _task,
 		GsmTask::GsmTaskFSM_t& _fsm )
 {
-	// meshLogDbg( "GwNodeFSM: EXITING state=%s", getNameStr() );
+	spdlog::info( "GsmTaskFSM: EXITING state={0}", getNameStr() );
 }
 
 
 GsmFSMResult_e
 GsmTaskStateBase::invalidEvent( const GsmEvent& _event ) const
 {
-//	meshLogErr( "GwNodeFSM: invalid event=%d rcv in state=%s",
-//				_event.getId(), getNameStr() );
+	spdlog::error("GsmTaskStateBase::invalidEvent: invalid event={0} state={1}",
+			_event.getId(), getNameStr());
 
 	return GSM_FSM_FAILURE;
 }
@@ -113,8 +128,7 @@ GsmTaskStateBase::onActivate( GsmTask& _task,
 							  GsmTask::GsmTaskFSM_t& _fsm,
 								   const GsmEvent& _event ) const
 {
-	// meshLogErr( "::OnRoleChange: recv msg" );
-
+	spdlog::error("GsmTaskStateBase::onActivate: event not handled!!");
 	return invalidEvent( _event );
 }
 
@@ -124,8 +138,7 @@ GsmTaskStateBase::onTrackingRsp( GsmTask& _task,
 							  GsmTask::GsmTaskFSM_t& _fsm,
 								   const GsmEvent& _event ) const
 {
-	// meshLogErr( "::OnRoleChange: recv msg" );
-
+	spdlog::error("GsmTaskStateBase::onTrackingRsp: event not handled!!");
 	return invalidEvent( _event );
 }
 
@@ -135,12 +148,38 @@ GsmTaskStateBase::onGetPosRsp( GsmTask& _task,
 							  GsmTask::GsmTaskFSM_t& _fsm,
 								   const GsmEvent& _event ) const
 {
-	// meshLogErr( "::OnRoleChange: recv msg" );
-
+	spdlog::error("GsmTaskStateBase::onGetPosRsp: event not handled!!");
 	return invalidEvent( _event );
 }
 
 
+GsmFSMResult_e
+GsmTaskStateBase::onReloadDbRsp( GsmTask& _task,
+							  GsmTask::GsmTaskFSM_t& _fsm,
+								   const GsmEvent& _event ) const
+{
+	spdlog::error("GsmTaskStateBase::onReloadDbRsp: event not handled!!");
+	return invalidEvent( _event );
+}
 
+
+GsmFSMResult_e
+GsmTaskStateBase::onMoveRotatorRsp( GsmTask& _task,
+							  	  GsmTask::GsmTaskFSM_t& _fsm,
+								   const GsmEvent& _event ) const
+{
+	spdlog::error("GsmTaskStateBase::onMoveRotatorRsp: event not handled!!");
+	return invalidEvent( _event );
+}
+
+
+GsmFSMResult_e
+GsmTaskStateBase::onGetRotatorPosRsp( GsmTask& _task,
+							  	  	  GsmTask::GsmTaskFSM_t& _fsm,
+									  const GsmEvent& _event ) const
+{
+	spdlog::error("GsmTaskStateBase::onMoveRotatorRsp: event not handled!!");
+	return invalidEvent( _event );
+}
 
 

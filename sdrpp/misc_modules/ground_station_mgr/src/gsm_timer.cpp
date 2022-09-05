@@ -31,6 +31,11 @@
 #include "gsm_timer_mgr.h"
 
 
+GsmTimer::GsmTimer()
+{
+	mTimerId = -1;
+}
+
 
 GsmTimer::GsmTimer(const std::string& _owner, int _msgType)
 {

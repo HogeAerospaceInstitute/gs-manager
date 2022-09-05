@@ -224,21 +224,31 @@ class GsmMsgGetSatellitePosReq : public GsmMsg
 		GsmMsgGetSatellitePosReq() {}
 		virtual ~GsmMsgGetSatellitePosReq() {}
 
-
-		void setSatelliteName(const std::string& _name)
+		void setTaskId(const std::string& _taskId)
 		{
-			mSatelliteName = _name;
+			mTaskId = _taskId;
 		}
 
-		void getSatelliteName(std::string& _name)
+		void getTaskId(std::string& _taskId)
 		{
-			_name = mSatelliteName;
+			_taskId = mTaskId;
+		}
+
+		void setSatellite(const std::string& _name)
+		{
+			mSatellite = _name;
+		}
+
+		void getSatellite(std::string& _name)
+		{
+			_name = mSatellite;
 		}
 
 
 	private:
 
-		std::string mSatelliteName;
+		std::string mTaskId;
+		std::string mSatellite;
 
 };
 
@@ -247,44 +257,31 @@ class GsmMsgGetSatellitePosRsp : public GsmMsg
 {
 	public:
 
-		GsmMsgGetSatellitePosRsp() {}
+		GsmMsgGetSatellitePosRsp()
+		{
+			mResult = 0;
+		}
+
 		virtual ~GsmMsgGetSatellitePosRsp() {}
 
-
-		void setSatelliteName(const std::string& _name)
+		void setTaskId(const std::string& _taskId)
 		{
-			mSatelliteName = _name;
+			mTaskId = _taskId;
 		}
 
-		void getSatelliteName(std::string& _name)
+		void getTaskId(std::string& _taskId)
 		{
-			_name = mSatelliteName;
+			_taskId = mTaskId;
 		}
 
-
-	private:
-
-		std::string mSatelliteName;
-
-};
-
-
-class GsmMsgMoveRotatorReq : public GsmMsg
-{
-	public:
-
-		GsmMsgMoveRotatorReq() {}
-		virtual ~GsmMsgMoveRotatorReq() {}
-
-
-		void setSatelliteName(const std::string& _name)
+		void setSatellite(const std::string& _satellite)
 		{
-			mSatelliteName = _name;
+			mSatellite = _satellite;
 		}
 
-		void getSatelliteName(std::string& _name)
+		void getSatellite(std::string& _satellite)
 		{
-			_name = mSatelliteName;
+			_satellite = mSatellite;
 		}
 
 		void setAzimuth(const std::string& _azimuth)
@@ -310,11 +307,213 @@ class GsmMsgMoveRotatorReq : public GsmMsg
 
 	private:
 
-		std::string mSatelliteName;
+		std::string mTaskId;
+		std::string mSatellite;
+		std::string mAzimuth;
+		std::string mElevation;
+		int mResult;
+
+};
+
+
+class GsmMsgMoveRotatorReq : public GsmMsg
+{
+	public:
+
+		GsmMsgMoveRotatorReq() {}
+		virtual ~GsmMsgMoveRotatorReq() {}
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+		void setSatellite(const std::string& _satellite)
+		{
+			mSatellite = _satellite;
+		}
+
+		void getSatellite(std::string& _satellite)
+		{
+			_satellite = mSatellite;
+		}
+
+		void setAzimuth(const std::string& _azimuth)
+		{
+			mAzimuth = _azimuth;
+		}
+
+		void getAzimuth(std::string& _azimuth)
+		{
+			_azimuth = mAzimuth;
+		}
+
+		void setElevation(const std::string& _elevation)
+		{
+			mElevation = _elevation;
+		}
+
+		void getElevation(std::string& _elevation)
+		{
+			_elevation = mElevation;
+		}
+
+
+	private:
+
+		std::string mTaskId;
+		std::string mSatellite;
 		std::string mAzimuth;
 		std::string mElevation;
 
 };
+
+
+class GsmMsgMoveRotatorRsp : public GsmMsg
+{
+	public:
+
+		GsmMsgMoveRotatorRsp() {
+			mResult = 0;
+		}
+
+		virtual ~GsmMsgMoveRotatorRsp() {}
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+
+	private:
+
+		std::string mTaskId;
+		int mResult;
+
+};
+
+
+class GsmMsgReloadPredictDbReq : public GsmMsg
+{
+	public:
+
+		GsmMsgReloadPredictDbReq() {}
+
+		virtual ~GsmMsgReloadPredictDbReq() {}
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+
+
+	private:
+
+		std::string mTaskId;
+
+};
+
+
+class GsmMsgReloadPredictDbRsp : public GsmMsg
+{
+	public:
+
+		GsmMsgReloadPredictDbRsp() {
+			mResult = 0;
+		}
+
+		virtual ~GsmMsgReloadPredictDbRsp() {}
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+
+
+	private:
+
+		std::string mTaskId;
+		int mResult;
+
+};
+
+
+class GsmMsgGetRotatorPosReq : public GsmMsg
+{
+	public:
+
+		GsmMsgGetRotatorPosReq() {}
+
+		virtual ~GsmMsgGetRotatorPosReq() {}
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+
+	private:
+
+		std::string mTaskId;
+
+};
+
+
+class GsmMsgGetRotatorPosRsp : public GsmMsg
+{
+	public:
+
+		GsmMsgGetRotatorPosRsp() {}
+
+		virtual ~GsmMsgGetRotatorPosRsp() {}
+
+		void setTaskId(const std::string& _taskId)
+		{
+			mTaskId = _taskId;
+		}
+
+		void getTaskId(std::string& _taskId)
+		{
+			_taskId = mTaskId;
+		}
+
+
+
+	private:
+
+		std::string mTaskId;
+		std::string mAzimuth;
+		std::string mElevation;
+
+};
+
 
 
 #endif

@@ -26,6 +26,7 @@
 
 #include "BaseStateMachine.h"
 #include "gsm_event.h"
+#include "gsm_timer.h"
 
 
 using namespace std;
@@ -76,6 +77,9 @@ class GsmTask
 			mStatus = _status;
 		}
 
+		GsmTimer& getWfGetPosRspTimer() { return mWfGetPosRspTimer; }
+
+
 
 	private:
 
@@ -90,6 +94,11 @@ class GsmTask
 		string mStatus;
 
 		GsmTaskFSM_t mTaskFSM;
+
+		GsmTimer mWfGetPosRspTimer;
+		GsmTimer mWfTrackingRspTimer;
+		GsmTimer mWfStartRecordingTimer;
+		GsmTimer mWfQueryRotatorPosTimer;
 
 };
 

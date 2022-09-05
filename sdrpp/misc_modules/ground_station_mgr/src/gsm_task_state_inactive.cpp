@@ -46,24 +46,25 @@ GsmTaskStateInactive::onActivate(GsmTask& _task,
 								 const GsmEvent& _event) const
 {
 	std::string tle;
-	std::string satelliteName;
+	std::string taskId;
 
 	spdlog::info("GsmTaskStateInactive::onActivate: entered...");
 
     _task.getTLE(tle);
+    _task.getUuid(taskId);
 
 	// update predict data file with TLE
 	writeTLEToPredictDb(tle);
 
-	GsmMsg* pMsg = new GsmMsg();
+	GsmMsgReloadPredictDbReq* pMsg = new GsmMsgReloadPredictDbReq();
 	pMsg->setDestination("ROTCTRL");
 	pMsg->setType(GSM_MSG_TYPE_RELOAD_PREDICT_DB_REQ);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setTaskId(taskId);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
-	// TODO start timer
-
+	_task.getWfGetPosRspTimer().start(10, GsmTimer::ONCE);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mWfTrackingRspState );
 

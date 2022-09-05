@@ -19,69 +19,42 @@
  */
 
 /*
- * gsm_event.h
+ * gsm_task_state_recording.h
  *
  *  Created on: Aug 28, 2022
  *
  */
 
-#ifndef _GSM_EVENT_H_
-#define _GSM_EVENT_H_
+#ifndef _GSM_TASK_STATE_RECORDING_H_
+#define _GSM_TASK_STATE_RECORDING_H_
 
 
-#include "BaseStateMachine.h"
-
-#include "gsm_globals.h"
-#include "gsm_msg.h"
+#include "gsm_task.h"
+#include "gsm_task_state_base.h"
 
 
 
-//---------------------- Types/Macros ---------------------------------
-typedef enum GsmFSMEventId
+class GsmTaskStateRecording : public GsmTaskStateBase
 {
-	GSM_FSM_EVENT_ID_INVALID = 0,
-	GSM_FSM_EVENT_ID_ACTIVATE_TASK,
-	GSM_FSM_EVENT_ID_TRACKING_RSP,
-	GSM_FSM_EVENT_ID_GET_POS_RSP,
-	GSM_FSM_EVENT_ID_RELOAD_DB_RSP,
-	GSM_FSM_EVENT_ID_MOVE_ROTATOR_RSP,
-	GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP,
-	GSM_FSM_EVENT_ID_MAX
-} GsmFSMEventId_e;
-
-
-
-class GsmEvent : public BaseEvent
-{
-
 	public:
 
-		GsmEvent();
-		GsmEvent( const GsmMsg& _msg );
+		GsmTaskStateRecording()
+			: GsmTaskStateBase( GSM_TASK_STATE_RECORDING,
+								   "GSM_TASK_STATE_RECORDING" )  {}
 
-		virtual ~GsmEvent() {}
-
-		GsmResult_e init( const GsmMsg& _msg );
+		virtual ~GsmTaskStateRecording() {}
 
 
-		void* getData() const { return mData; }
-		void setData( void* _data ) { mData = _data; }
-
-		GsmMsg* getMsg() const { return (GsmMsg*)mData; }
+		virtual GsmFSMResult_e onStopRecording(GsmTask& _task,
+										  GsmTask::GsmTaskFSM_t& _fsm,
+									      const GsmEvent& _event ) const;
 
 
 	private:
 
-		const char* convertEventIdToStr(GsmFSMEventId_e _id);
-		GsmFSMEventId_e convertMsgTypeToEventId(int _msgType);
-
-
-	private:
-
-		void* mData;
 
 
 };
 
 
-#endif
+#endif /* _GSM_TASK_STATE_RECORDING_H_ */
