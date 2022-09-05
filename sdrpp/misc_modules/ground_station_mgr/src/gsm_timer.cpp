@@ -26,6 +26,7 @@
  *      Author: jrenkema
  */
 
+#include <spdlog/spdlog.h>
 
 #include "gsm_timer.h"
 #include "gsm_timer_mgr.h"
@@ -42,6 +43,7 @@ GsmTimer::GsmTimer(const std::string& _owner, int _msgType)
 	mTimerId = -1;
 	mOwner = _owner;
 	mMsgType = _msgType;
+	mInterval = 0;
 }
 
 
@@ -53,7 +55,15 @@ GsmTimer::~GsmTimer()
 //template<typename Fun>
 void GsmTimer::start(unsigned _interval, TimerType _type)
 {
-    stop();
+	spdlog::info("GsmTimer::start: entered...");
+
+	if (mTimerId != -1)
+	{
+		spdlog::info("GsmTimer::start: timer already started...");
+		return;
+	}
+
+ //   stop();
     mInterval = _interval;
 //    timerFun_ = fun;
     mTimerType = _type;
@@ -64,6 +74,8 @@ void GsmTimer::start(unsigned _interval, TimerType _type)
 
 void GsmTimer::stop()
 {
+	spdlog::info("GsmTimer::stop: entered...");
+
     if (mTimerId != -1)
     {
         GsmTimerMgr::getInstance()->RemoveTimer(mTimerId);
@@ -74,6 +86,8 @@ void GsmTimer::stop()
 
 void GsmTimer::onTimeout()
 {
+	spdlog::info("GsmTimer::onTimeout: entered...");
+
     if (mTimerType == GsmTimer::CIRCLE)
     {
         //expires_ = mInterval + now;

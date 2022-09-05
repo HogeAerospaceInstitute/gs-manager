@@ -58,6 +58,7 @@ GsmTimerMgr* GsmTimerMgr::getInstance()
 
 GsmTimerMgr::GsmTimerMgr()
 {
+	mThread = NULL;
 }
 
 
@@ -103,6 +104,9 @@ size_t GsmTimerMgr::AddTimer(GsmTimer* timer)
     heap_.push_back(entry);
     UpHeap(heap_.size() - 1);
 
+	spdlog::info("GsmTimerMgr::AddTimer: index={0}, interval={1}, time={2}",
+				entry.index, timer->getInterval(), entry.time);
+
     return timerId;
 }
 
@@ -110,6 +114,9 @@ size_t GsmTimerMgr::AddTimer(GsmTimer* timer)
 void GsmTimerMgr::RemoveTimer(int _timerId)
 {
     size_t index = _timerId;
+
+	spdlog::info("GsmTimerMgr::RemoveTimer: index={0}", index);
+
     if (!heap_.empty() && index < heap_.size())
     {
         if (index == heap_.size() - 1)
@@ -134,6 +141,8 @@ void GsmTimerMgr::DetectTimers()
 {
     unsigned long long now = GetCurrentMillisecs();
 
+//	spdlog::info("GsmTimerMgr::DetectTimers: time={0}", now);
+
     while (!heap_.empty() && heap_[0].time <= now)
     {
     	int index = heap_[0].index;
@@ -146,6 +155,8 @@ void GsmTimerMgr::DetectTimers()
 
 void GsmTimerMgr::UpHeap(size_t index)
 {
+	spdlog::info("GsmTimerMgr::UpHeap: entered...");
+
     size_t parent = (index - 1) / 2;
     while (index > 0 && heap_[index].time < heap_[parent].time)
     {
@@ -199,6 +210,9 @@ unsigned long long GsmTimerMgr::GetCurrentMillisecs()
 
 void GsmTimerMgr::fireTimer(HeapEntry_t& _entry)
 {
+	spdlog::info("GsmTimerMgr::fireTimer: index={0}, expire-time={1}",
+			_entry.index, _entry.time);
+
 	GsmMsg* pMsg = new GsmMsg();
 	pMsg->setDestination(_entry.owner.c_str());
 	pMsg->setType(_entry.msgType);
