@@ -101,6 +101,7 @@ size_t GsmTimerMgr::AddTimer(GsmTimer* timer)
     entry.time = timer->getInterval() + GetCurrentMillisecs();
     entry.msgType = timer->getMsgType();
     timer->getOwner(entry.owner);
+    timer->getAppId(entry.appId);
     heap_.push_back(entry);
     UpHeap(heap_.size() - 1);
 
@@ -141,8 +142,6 @@ void GsmTimerMgr::DetectTimers()
 {
     unsigned long long now = GetCurrentMillisecs();
 
-//	spdlog::info("GsmTimerMgr::DetectTimers: time={0}", now);
-
     while (!heap_.empty() && heap_[0].time <= now)
     {
     	int index = heap_[0].index;
@@ -155,8 +154,6 @@ void GsmTimerMgr::DetectTimers()
 
 void GsmTimerMgr::UpHeap(size_t index)
 {
-	spdlog::info("GsmTimerMgr::UpHeap: entered...");
-
     size_t parent = (index - 1) / 2;
     while (index > 0 && heap_[index].time < heap_[parent].time)
     {
@@ -213,10 +210,11 @@ void GsmTimerMgr::fireTimer(HeapEntry_t& _entry)
 	spdlog::info("GsmTimerMgr::fireTimer: index={0}, expire-time={1}",
 			_entry.index, _entry.time);
 
-	GsmMsg* pMsg = new GsmMsg();
+	GsmMsgTimeout* pMsg = new GsmMsgTimeout();
 	pMsg->setDestination(_entry.owner.c_str());
 	pMsg->setType(_entry.msgType);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setAppId(_entry.appId);
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 }

@@ -23,7 +23,7 @@
  * gsm_timer.cpp
  *
  *  Created on: Aug 25, 2022
- *      Author: jrenkema
+ *
  */
 
 #include <spdlog/spdlog.h>
@@ -34,16 +34,20 @@
 
 GsmTimer::GsmTimer()
 {
-	mTimerId = -1;
+	mTimerId = GSM_INVALID_TIMER_ID;
+	mMsgType = 0;
+	mInterval = 0;
+	mTimerType = ONCE;
 }
 
 
 GsmTimer::GsmTimer(const std::string& _owner, int _msgType)
 {
-	mTimerId = -1;
+	mTimerId = GSM_INVALID_TIMER_ID;
 	mOwner = _owner;
 	mMsgType = _msgType;
 	mInterval = 0;
+	mTimerType = ONCE;
 }
 
 
@@ -52,34 +56,40 @@ GsmTimer::~GsmTimer()
     stop();
 }
 
-//template<typename Fun>
+
+void GsmTimer::init(const std::string& _owner,  const std::string& _appId, int _msgType)
+{
+	mOwner = _owner;
+	mAppId = _appId;
+	mMsgType = _msgType;
+}
+
+
 void GsmTimer::start(unsigned _interval, TimerType _type)
 {
-	spdlog::info("GsmTimer::start: entered...");
+	spdlog::info("GsmTimer::start: interval={0}, type={1}",
+			_interval, _type);
 
-	if (mTimerId != -1)
+	if (mTimerId != GSM_INVALID_TIMER_ID)
 	{
 		spdlog::info("GsmTimer::start: timer already started...");
 		return;
 	}
 
- //   stop();
     mInterval = _interval;
-//    timerFun_ = fun;
     mTimerType = _type;
- //   expires_ = interval_ + GsmTimerMgr::GetCurrentMillisecs();
     mTimerId = GsmTimerMgr::getInstance()->AddTimer(this);
 }
 
 
 void GsmTimer::stop()
 {
-	spdlog::info("GsmTimer::stop: entered...");
+	spdlog::info("GsmTimer::stop: timer-id={0}", mTimerId);
 
-    if (mTimerId != -1)
+    if (mTimerId != GSM_INVALID_TIMER_ID)
     {
         GsmTimerMgr::getInstance()->RemoveTimer(mTimerId);
-        mTimerId = -1;
+        mTimerId = GSM_INVALID_TIMER_ID;
     }
 }
 
@@ -90,12 +100,11 @@ void GsmTimer::onTimeout()
 
     if (mTimerType == GsmTimer::CIRCLE)
     {
-        //expires_ = mInterval + now;
         mTimerId = GsmTimerMgr::getInstance()->AddTimer(this);
     }
     else
     {
-    	mTimerId = -1;
+    	mTimerId = GSM_INVALID_TIMER_ID;
     }
 }
 

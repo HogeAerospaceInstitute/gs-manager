@@ -43,6 +43,7 @@ typedef struct HeapEntry
 
 	std::string owner;
 	int msgType;
+	std::string appId;
 
 } HeapEntry_t;
 

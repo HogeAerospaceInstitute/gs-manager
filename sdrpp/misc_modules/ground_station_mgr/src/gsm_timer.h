@@ -34,6 +34,8 @@
 #include "gsm_globals.h"
 
 
+#define GSM_INVALID_TIMER_ID		-1
+
 
 class GsmTimer
 {
@@ -42,10 +44,12 @@ class GsmTimer
     	enum TimerType { ONCE, CIRCLE };
 
     	GsmTimer();
-    	GsmTimer(const std::string& _owner, int _msgId);
+    	GsmTimer(const std::string& _owner, int _msgType);
     	virtual ~GsmTimer();
 
-    	void init(const std::string& _owner, int _msgId);
+    	void init(const std::string& _owner,
+    			  const std::string& _appId,
+				  int _msgType);
 
     	void start();
     	void start(unsigned interval, TimerType timeType = ONCE);
@@ -58,6 +62,10 @@ class GsmTimer
     		_owner = mOwner;
     	}
 
+    	void getAppId(std::string& _appId) {
+    		_appId = mAppId;
+    	}
+
     	int getMsgType() { return mMsgType; }
 
 
@@ -65,14 +73,13 @@ class GsmTimer
 	private:
 
     	TimerType mTimerType;
-    	int mTimerId;  					// heapIndex
+    	int mTimerId;
 
     	std::string mOwner;
+    	std::string mAppId;
     	int mMsgType;
 
     	unsigned mInterval;
-
-    	unsigned long long expires_;
 
 };
 
