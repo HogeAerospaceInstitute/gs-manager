@@ -113,7 +113,7 @@ GsmTaskStateWfRotatorAligned::onQueryRotatorPosRsp(GsmTask& _task,
 
 
 	// TODO start timer
-
+	_task.getRecordingDelayTimer().start(10, GsmTimer::ONCE);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mRotatorAlignedState );
 

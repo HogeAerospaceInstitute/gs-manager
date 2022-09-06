@@ -78,7 +78,7 @@ class GsmTask
 		}
 
 		GsmTimer& getWfGetPosRspTimer() { return mWfGetPosRspTimer; }
-
+		GsmTimer& getRecordingDelayTimer() { return mRecordingDelayTimer; }
 
 
 	private:
@@ -99,6 +99,7 @@ class GsmTask
 		GsmTimer mWfTrackingRspTimer;
 		GsmTimer mWfStartRecordingTimer;
 		GsmTimer mWfQueryRotatorPosTimer;
+		GsmTimer mRecordingDelayTimer;
 
 };
 
