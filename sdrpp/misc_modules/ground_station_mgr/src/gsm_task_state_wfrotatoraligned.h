@@ -39,7 +39,7 @@ class GsmTaskStateWfRotatorAligned : public GsmTaskStateBase
 
 		GsmTaskStateWfRotatorAligned()
 			: GsmTaskStateBase( GSM_TASK_STATE_WF_ROTATOR_ALIGNED,
-								   "GSM_TASK_STATE_WF_ROTATOR_ALIGNED" )  {}
+								   "WF_ROTATOR_ALIGNED" )  {}
 
 		virtual ~GsmTaskStateWfRotatorAligned() {}
 
@@ -48,9 +48,13 @@ class GsmTaskStateWfRotatorAligned : public GsmTaskStateBase
 										  GsmTask::GsmTaskFSM_t& _fsm,
 									      const GsmEvent& _event ) const;
 
-		virtual GsmFSMResult_e onQueryRotatorPosRsp(GsmTask& _task,
+		virtual GsmFSMResult_e onGetRotatorPosRsp(GsmTask& _task,
 										  GsmTask::GsmTaskFSM_t& _fsm,
 									      const GsmEvent& _event ) const;
+
+		virtual GsmFSMResult_e onCheckRotatorDelayTimeout(GsmTask& _task,
+										 GsmTask::GsmTaskFSM_t& _fsm,
+										 const GsmEvent& _event) const;
 
 
 	private:

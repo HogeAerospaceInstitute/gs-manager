@@ -64,7 +64,7 @@ GsmTaskStateInactive::onActivate(GsmTask& _task,
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
-	_task.getWfGetPosRspTimer().start(10000, GsmTimer::ONCE);
+	_task.getTrackSatelliteRspTimer().start(10000, GsmTimer::ONCE);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mWfTrackingRspState );
 

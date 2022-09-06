@@ -49,6 +49,8 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 
 	spdlog::info("GsmTaskStateWfGetPosRsp::onGetPosRsp: entered...");
 
+	_task.getGetSatellitePosRspTimer().stop();
+
 	_task.getUuid(taskId);
 
     // Get az/el from response message
@@ -67,7 +69,7 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
-	// TODO start timer
+	_task.getMoveRotatorRspTimer().start(10000, GsmTimer::ONCE);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mWfRotatorAlignedState );
 

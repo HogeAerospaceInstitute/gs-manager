@@ -34,7 +34,7 @@
 
 
 /*********************************************************************
- *	Name:	onTrackingRsp
+ *	Name:	onReloadDbRsp
  *	Description:
  *	Parameters: NA
  *	Returns:	NA
@@ -42,14 +42,16 @@
  *********************************************************************/
 GsmFSMResult_e
 GsmTaskStateWfTrackingRsp::onReloadDbRsp(GsmTask& _task,
-								 GsmTask::GsmTaskFSM_t& _fsm,
-								 const GsmEvent& _event) const
+										 GsmTask::GsmTaskFSM_t& _fsm,
+										 const GsmEvent& _event) const
 {
 	std::string taskId;
 	std::string tle;
 	std::string satelliteName;
 
 	spdlog::info("GsmTaskStateWfTrackingRsp::onReloadDbRsp: entered...");
+
+	_task.getTrackSatelliteRspTimer().stop();
 
 	_task.getUuid(taskId);
     _task.getTLE(tle);
@@ -72,8 +74,7 @@ GsmTaskStateWfTrackingRsp::onReloadDbRsp(GsmTask& _task,
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
-	// TODO start timer
-
+	_task.getGetSatellitePosRspTimer().start(10000, GsmTimer::ONCE);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mWfGetPosRspState );
 

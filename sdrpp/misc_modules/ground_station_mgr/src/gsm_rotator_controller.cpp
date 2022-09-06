@@ -81,7 +81,7 @@ GsmResult_e GsmRotatorController::onMessage(GsmMsg* _msg)
 			result = handleMoveRotatorReq(dynamic_cast<GsmMsgMoveRotatorReq*>(_msg));
 			break;
 		}
-		case GSM_MSG_TYPE_QUERY_ROTATOR_POS_REQ:
+		case GSM_MSG_TYPE_GET_ROTATOR_POS_REQ:
 		{
 			result = handleGetRotatorPosReq(dynamic_cast<GsmMsgGetRotatorPosReq*>(_msg));
 			break;
@@ -268,7 +268,7 @@ GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq*
 	GsmMsgGetRotatorPosRsp* pMsg = new GsmMsgGetRotatorPosRsp();
 
 	pMsg->setDestination("GSMGR");
-	pMsg->setType(GSM_MSG_TYPE_QUERY_ROTATOR_POS_RSP);
+	pMsg->setType(GSM_MSG_TYPE_GET_ROTATOR_POS_RSP);
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 	pMsg->setTaskId(taskId);
 

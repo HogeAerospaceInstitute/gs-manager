@@ -40,7 +40,7 @@ class GsmTaskStateWfGetPosRsp : public GsmTaskStateBase
 
 		GsmTaskStateWfGetPosRsp()
 			: GsmTaskStateBase(GSM_TASK_STATE_WF_GET_POS_RSP,
-							   "GSM_TASK_STATE_WF_GET_POS_RSP" )  {}
+							   "WF_GET_SATELLITE_POS_RSP" )  {}
 
 		virtual ~GsmTaskStateWfGetPosRsp() {}
 

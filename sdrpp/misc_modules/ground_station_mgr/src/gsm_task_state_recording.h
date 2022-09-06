@@ -40,10 +40,13 @@ class GsmTaskStateRecording : public GsmTaskStateBase
 
 		GsmTaskStateRecording()
 			: GsmTaskStateBase( GSM_TASK_STATE_RECORDING,
-								   "GSM_TASK_STATE_RECORDING" )  {}
+								   "RECORDING" )  {}
 
 		virtual ~GsmTaskStateRecording() {}
 
+		virtual GsmFSMResult_e onDeactivate(GsmTask& _task,
+										  GsmTask::GsmTaskFSM_t& _fsm,
+										  const GsmEvent& _event ) const;
 
 		virtual GsmFSMResult_e onStopRecording(GsmTask& _task,
 										  GsmTask::GsmTaskFSM_t& _fsm,

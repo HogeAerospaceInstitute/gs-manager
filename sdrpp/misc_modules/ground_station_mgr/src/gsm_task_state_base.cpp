@@ -61,6 +61,11 @@ GsmTaskStateBase::onEvent(GsmTask& _task,
 			result = onActivate(_task, _fsm, *gsmEvent);
 			break;
 		}
+		case GSM_FSM_EVENT_ID_DEACTIVATE_TASK:
+		{
+			result = onDeactivate(_task, _fsm, *gsmEvent);
+			break;
+		}
 		case GSM_FSM_EVENT_ID_TRACKING_RSP:
 		{
 			result = onTrackingRsp(_task, _fsm, *gsmEvent);
@@ -84,6 +89,16 @@ GsmTaskStateBase::onEvent(GsmTask& _task,
 		case GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP:
 		{
 			result = onGetRotatorPosRsp(_task, _fsm, *gsmEvent);
+			break;
+		}
+		case GSM_FSM_EVENT_ID_CHECK_ROTATOR_DELAY_TIMEOUT:
+		{
+			result = onCheckRotatorDelayTimeout(_task, _fsm, *gsmEvent);
+			break;
+		}
+		case GSM_FSM_EVENT_ID_RECORDING_DELAY_TIMEOUT:
+		{
+			result = onRecordingDelayTimeout(_task, _fsm, *gsmEvent);
 			break;
 		}
 		default:
@@ -129,6 +144,16 @@ GsmTaskStateBase::onActivate( GsmTask& _task,
 								   const GsmEvent& _event ) const
 {
 	spdlog::error("GsmTaskStateBase::onActivate: event not handled!!");
+	return invalidEvent( _event );
+}
+
+
+GsmFSMResult_e
+GsmTaskStateBase::onDeactivate( GsmTask& _task,
+							  GsmTask::GsmTaskFSM_t& _fsm,
+								   const GsmEvent& _event ) const
+{
+	spdlog::error("GsmTaskStateBase::onDeactivate: event not handled!!");
 	return invalidEvent( _event );
 }
 
@@ -182,4 +207,23 @@ GsmTaskStateBase::onGetRotatorPosRsp( GsmTask& _task,
 	return invalidEvent( _event );
 }
 
+
+GsmFSMResult_e
+GsmTaskStateBase::onCheckRotatorDelayTimeout(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+	spdlog::error("GsmTaskStateBase::onCheckRotatorDelayTimeout: event not handled!!");
+	return invalidEvent( _event );
+}
+
+
+GsmFSMResult_e
+GsmTaskStateBase::onRecordingDelayTimeout(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+	spdlog::error("GsmTaskStateBase::onRecordingDelayTimeout: event not handled!!");
+	return invalidEvent( _event );
+}
 

@@ -38,14 +38,14 @@ class GsmTaskStateRotatorAligned : public GsmTaskStateBase
 
 		GsmTaskStateRotatorAligned()
 			: GsmTaskStateBase( GSM_TASK_STATE_ROTATOR_ALIGNED,
-								   "GSM_TASK_STATE_ROTATOR_ALIGNED" )  {}
+								   "ROTATOR_ALIGNED" )  {}
 
 		virtual ~GsmTaskStateRotatorAligned() {}
 
+		virtual GsmFSMResult_e onRecordingDelayTimeout(GsmTask& _task,
+										 GsmTask::GsmTaskFSM_t& _fsm,
+										 const GsmEvent& _event) const;
 
-		virtual GsmFSMResult_e onStartRecordingTimeout(GsmTask& _task,
-										  GsmTask::GsmTaskFSM_t& _fsm,
-									      const GsmEvent& _event ) const;
 
 
 	private:

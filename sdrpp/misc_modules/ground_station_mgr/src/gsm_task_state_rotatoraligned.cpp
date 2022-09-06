@@ -25,6 +25,8 @@
  *
  */
 
+#include <signal_path/signal_path.h>
+
 #include <spdlog/spdlog.h>
 
 #include "gsm_task_state_rotatoraligned.h"
@@ -32,30 +34,24 @@
 
 
 /*********************************************************************
- *	Name:	onGetPosRsp
+ *	Name:	onRecordingDelayTimeout
  *	Description:
  *	Parameters: NA
  *	Returns:	NA
  *	Notes:
  *********************************************************************/
 GsmFSMResult_e
-GsmTaskStateRotatorAligned::onStartRecordingTimeout(GsmTask& _task,
+GsmTaskStateRotatorAligned::onRecordingDelayTimeout(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	std::string tle;
-	std::string satelliteName;
 
-	// GsmMsg* pMsg = _event.getMsg();
+	spdlog::info("GsmTaskStateInactive::onRecordingDelayTimeout: entered...");
 
-	spdlog::info("GsmTaskStateInactive::onStartRecordingTimeout: entered...");
+	_task.getRecordingDelayTimer().onTimeout();
 
-
-	// TODO: send message to start recording
-
-
-	// TODO start timer
-
+	// start recording
+	sigpath::sourceManager.start();
 
 	_fsm.setState( (BaseState<GsmTask>*)&mRecordingState );
 

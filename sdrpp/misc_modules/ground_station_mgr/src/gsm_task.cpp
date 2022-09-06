@@ -37,9 +37,7 @@
  * Default constructor
  */
 GsmTask::GsmTask()
-	: mTaskFSM(*this,
-				(BaseState<GsmTask>*)&GsmTaskStateBase::mInactiveState)
-
+	: mTaskFSM(*this, (BaseState<GsmTask>*)&GsmTaskStateBase::mInactiveState)
 {
 	mStartTime = 0;
 	mEndTime = 0;
@@ -90,6 +88,14 @@ void GsmTask::init(const string& _task)
 	// convert string to double
 	string frequency = task["frequency"];
 	mFrequency = std::stod(frequency);
+
+	// Initialize timers
+	mTrackSatelliteRspTimer.init("GSMGR", mUUID, GSM_MSG_TYPE_TRACK_SATELLITE_TIMEOUT);
+	mGetSatellitePosRspTimer.init("GSMGR", mUUID, GSM_MSG_TYPE_GET_SATELLITE_POS_TIMEOUT);
+	mMoveRotatorRspTimer.init("GSMGR", mUUID, GSM_MSG_TYPE_MOVE_ROTATOR_TIMEOUT);
+	mGetRotatorPosRspTimer.init("GSMGR", mUUID, GSM_MSG_TYPE_GET_ROTATOR_POS_TIMEOUT);
+	mCheckRotatorDelayTimer.init("GSMGR", mUUID, GSM_MSG_TYPE_CHECK_ROTATOR_DELAY_TIMEOUT);
+	mRecordingDelayTimer.init("GSMGR", mUUID, GSM_MSG_TYPE_RECORDING_DELAY_TIMEOUT);
 }
 
 
@@ -117,8 +123,4 @@ GsmFSMResult_e GsmTask::onEvent(const GsmEvent& _event)
 {
 	return (GsmFSMResult_e)mTaskFSM.onEvent( &_event );
 }
-
-
-
-
 

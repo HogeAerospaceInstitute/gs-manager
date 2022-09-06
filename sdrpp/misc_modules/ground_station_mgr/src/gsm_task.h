@@ -70,35 +70,41 @@ class GsmTask
 		}
 
 		void getStatus(string& _status) const {
-			_status = mStatus;
+			std::string status = mTaskFSM.getCurrentState()->getNameStr();
+			_status = status;
 		}
 
 		void setStatus(string& _status) {
 			mStatus = _status;
 		}
 
-		GsmTimer& getWfGetPosRspTimer() { return mWfGetPosRspTimer; }
+		GsmTimer& getTrackSatelliteRspTimer() { return mTrackSatelliteRspTimer; }
+		GsmTimer& getGetSatellitePosRspTimer() { return mGetSatellitePosRspTimer; }
+		GsmTimer& getMoveRotatorRspTimer() { return mMoveRotatorRspTimer; }
+		GsmTimer& getGetRotatePosRspTimer() { return mGetRotatorPosRspTimer; }
+		GsmTimer& getCheckRotatorDelayTimer() { return mCheckRotatorDelayTimer;	}
 		GsmTimer& getRecordingDelayTimer() { return mRecordingDelayTimer; }
 
 
 	private:
 
-		string mUUID;
-		string mTLE;
+		std::string mUUID;
+		std::string mTLE;
 
 		time_t mStartTime;
 		time_t mEndTime;
 
 		double mFrequency;
 
-		string mStatus;
+		std::string mStatus;
 
 		GsmTaskFSM_t mTaskFSM;
 
-		GsmTimer mWfGetPosRspTimer;
-		GsmTimer mWfTrackingRspTimer;
-		GsmTimer mWfStartRecordingTimer;
-		GsmTimer mWfQueryRotatorPosTimer;
+		GsmTimer mTrackSatelliteRspTimer;
+		GsmTimer mGetSatellitePosRspTimer;
+		GsmTimer mMoveRotatorRspTimer;
+		GsmTimer mGetRotatorPosRspTimer;
+		GsmTimer mCheckRotatorDelayTimer;
 		GsmTimer mRecordingDelayTimer;
 
 };

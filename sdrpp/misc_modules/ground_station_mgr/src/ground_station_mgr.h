@@ -90,6 +90,9 @@ class GroundStationMgr : public GsmCommConsumer
 		GsmResult_e handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg);
 		GsmResult_e handleMoveRotatorRsp(GsmMsgMoveRotatorRsp* _msg);
 		GsmResult_e handleGetRotatorPosRsp(GsmMsgGetRotatorPosRsp* _msg);
+		GsmResult_e handleCheckRotatorDelayTimeout(GsmMsgTimeout* _msg);
+		GsmResult_e handleRecordingDelayTimeout(GsmMsgTimeout* _msg);
+
 
 		GsmResult_e handleReloadPredictDbRsp(GsmMsgReloadPredictDbRsp* _msg);
 

@@ -40,9 +40,19 @@ GsmEventIdStr_t eventIdStr[GSM_FSM_EVENT_ID_MAX] =
 {
 	{ "INVALID" },
 	{ "ACTIVATE_TASK" },
+	{ "DEACTIVATE_TASK" },
 	{ "TRACKING_RSP" },
+	{ "TRACKING_TIMEOUT" },
 	{ "GET_POSITION_RSP" },
-	{ "RELOAD_DB_RSP" }
+	{ "GET_POSITION_TIMEOUT" },
+	{ "RELOAD_DB_RSP" },
+	{ "RELOAD_DB_TIMEOUT" },
+	{ "MOVE_ROTATOR_RSP" },
+	{ "MOVE_ROTATOR_TIMEOUT" },
+	{ "GET_ROTATOR_POS_RSP" },
+	{ "GET_ROTATOR_POS_TIMEOUT" },
+	{ "CHECK_ROTATOR_DELAY_TIMEOUT" },
+	{ "RECORDING_DELAY_TIMEOUT" }
 };
 
 
@@ -83,9 +93,19 @@ GsmEvent::convertMsgTypeToEventId( int _msgType )
 			id = GSM_FSM_EVENT_ID_ACTIVATE_TASK;
 			break;
 		}
+		case GSM_MSG_TYPE_DEACTIVATE_TASK_REQ:
+		{
+			id = GSM_FSM_EVENT_ID_DEACTIVATE_TASK;
+			break;
+		}
 		case GSM_MSG_TYPE_TRACK_SATELLITE_RSP:
 		{
 			id = GSM_FSM_EVENT_ID_TRACKING_RSP;
+			break;
+		}
+		case GSM_MSG_TYPE_TRACK_SATELLITE_TIMEOUT:
+		{
+			id = GSM_FSM_EVENT_ID_TRACKING_TIMEOUT;
 			break;
 		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_RSP:
@@ -93,9 +113,19 @@ GsmEvent::convertMsgTypeToEventId( int _msgType )
 			id = GSM_FSM_EVENT_ID_GET_POS_RSP;
 			break;
 		}
+		case GSM_MSG_TYPE_GET_SATELLITE_POS_TIMEOUT:
+		{
+			id = GMS_FSM_EVENT_ID_GET_POS_TIMEOUT;
+			break;
+		}
 		case GSM_MSG_TYPE_RELOAD_PREDICT_DB_RSP:
 		{
 			id = GSM_FSM_EVENT_ID_RELOAD_DB_RSP;
+			break;
+		}
+		case GSM_MSG_TYPE_RELOAD_PREDICT_DB_TIMEOUT:
+		{
+			id = GSM_FSM_EVENT_ID_RELOAD_DB_TIMEOUT;
 			break;
 		}
 		case GSM_MSG_TYPE_MOVE_ROTATOR_RSP:
@@ -103,9 +133,29 @@ GsmEvent::convertMsgTypeToEventId( int _msgType )
 			id = GSM_FSM_EVENT_ID_MOVE_ROTATOR_RSP;
 			break;
 		}
-		case GSM_MSG_TYPE_QUERY_ROTATOR_POS_RSP:
+		case GSM_MSG_TYPE_MOVE_ROTATOR_TIMEOUT:
+		{
+			id = GSM_FSM_EVENT_ID_MOVE_ROTATOR_TIMEOUT;
+			break;
+		}
+		case GSM_MSG_TYPE_GET_ROTATOR_POS_RSP:
 		{
 			id = GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP;
+			break;
+		}
+		case GSM_MSG_TYPE_GET_ROTATOR_POS_TIMEOUT:
+		{
+			id = GSM_FSM_EVENT_ID_GET_ROTATOR_POS_TIMEOUT;
+			break;
+		}
+		case GSM_MSG_TYPE_CHECK_ROTATOR_DELAY_TIMEOUT:
+		{
+			id = GSM_FSM_EVENT_ID_CHECK_ROTATOR_DELAY_TIMEOUT;
+			break;
+		}
+		case GSM_MSG_TYPE_RECORDING_DELAY_TIMEOUT:
+		{
+			id = GSM_FSM_EVENT_ID_RECORDING_DELAY_TIMEOUT;
 			break;
 		}
 		default:

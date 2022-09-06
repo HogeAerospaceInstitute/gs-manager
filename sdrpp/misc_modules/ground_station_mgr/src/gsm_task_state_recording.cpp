@@ -25,6 +25,8 @@
  *
  */
 
+#include <signal_path/signal_path.h>
+
 #include <spdlog/spdlog.h>
 
 #include "gsm_task_state_recording.h"
@@ -63,6 +65,29 @@ GsmTaskStateRecording::onStopRecording(GsmTask& _task,
 }
 
 
+/*********************************************************************
+ *	Name:	onDeactivate
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateRecording::onDeactivate(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
 
+	spdlog::info("GsmTaskStateRecording::onDeactivate: entered...");
+
+
+	// stop recording
+	sigpath::sourceManager.stop();
+
+
+	_fsm.setState( (BaseState<GsmTask>*)&mInactiveState );
+
+	return GSM_FSM_SUCCESS;
+}
 
 

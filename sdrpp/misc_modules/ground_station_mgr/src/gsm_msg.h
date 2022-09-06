@@ -515,5 +515,44 @@ class GsmMsgGetRotatorPosRsp : public GsmMsg
 };
 
 
+class GsmMsgTimeout : public GsmMsg
+{
+public:
+
+	GsmMsgTimeout()
+	{
+		mTimerId = -1;
+	}
+
+	virtual ~GsmMsgTimeout() {}
+
+	void setAppId(const std::string& _appId)
+	{
+		mAppId = _appId;
+	}
+
+	void getAppId(std::string& _appId) const
+	{
+		_appId = mAppId;
+	}
+
+	void setTimerId(int _timerId)
+	{
+		mTimerId = _timerId;
+	}
+
+	int getTimerId(std::string& _taskId) const
+	{
+		return mTimerId;
+	}
+
+
+
+private:
+
+	int mTimerId;
+	std::string mAppId;
+
+};
 
 #endif

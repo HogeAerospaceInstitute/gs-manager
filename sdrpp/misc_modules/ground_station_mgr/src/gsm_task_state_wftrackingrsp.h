@@ -40,7 +40,7 @@ class GsmTaskStateWfTrackingRsp : public GsmTaskStateBase
 
 		GsmTaskStateWfTrackingRsp()
 			: GsmTaskStateBase(GSM_TASK_STATE_WF_TRACKING_RSP,
-							   "GSM_TASK_STATE_WF_TRACING_RSP" )  {}
+							   "WF_TRACKING_RSP" )  {}
 
 		virtual ~GsmTaskStateWfTrackingRsp() {}
 

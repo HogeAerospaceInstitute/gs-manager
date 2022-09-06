@@ -40,7 +40,7 @@ class GsmTaskStateInactive : public GsmTaskStateBase
 
 		GsmTaskStateInactive()
 			: GsmTaskStateBase( GSM_TASK_STATE_INACTIVE,
-								   "GSM_TASK_STATE_INACTIVE" )  {}
+								   "INACTIVE" )  {}
 
 		virtual ~GsmTaskStateInactive() {}
 

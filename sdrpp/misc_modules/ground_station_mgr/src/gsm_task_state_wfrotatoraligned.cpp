@@ -50,29 +50,16 @@ GsmTaskStateWfRotatorAligned::onMoveRotatorRsp(GsmTask& _task,
 
 	GsmMsgMoveRotatorRsp* pRsp = (GsmMsgMoveRotatorRsp*)_event.getMsg();
 
-	spdlog::info("GsmTaskStateInactive::onMoveRotatorRsp: entered...");
+	spdlog::info("GsmTaskStateWfRotatorAligned::onMoveRotatorRsp: entered...");
+
+	_task.getMoveRotatorRspTimer().stop();
 
 	pRsp->getTaskId(taskId);
 
-	// TODO: start timer to query rotator position
-
-
-	GsmMsgGetRotatorPosReq* pMsg = new GsmMsgGetRotatorPosReq();
-	pMsg->setDestination("ROTCTRL");
-	pMsg->setType(GSM_MSG_TYPE_QUERY_ROTATOR_POS_REQ);
-	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
-	pMsg->setTaskId(taskId);
-
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
-
-	// TODO start timer
-
-
-	// _fsm.setState( (BaseState<GsmTask>*)&mRotatorAlignedState );
+	_task.getCheckRotatorDelayTimer().start(10000, GsmTimer::ONCE);
 
 	return GSM_FSM_SUCCESS;
 }
-
 
 
 /*********************************************************************
@@ -83,7 +70,40 @@ GsmTaskStateWfRotatorAligned::onMoveRotatorRsp(GsmTask& _task,
  *	Notes:
  *********************************************************************/
 GsmFSMResult_e
-GsmTaskStateWfRotatorAligned::onQueryRotatorPosRsp(GsmTask& _task,
+GsmTaskStateWfRotatorAligned::onCheckRotatorDelayTimeout(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+	std::string taskId;
+
+	spdlog::info("GsmTaskStateWfRotatorAligned::onCheckRotatorDelayTimeout: entered...");
+
+	_task.getCheckRotatorDelayTimer().onTimeout();
+	_task.getUuid(taskId);
+
+	GsmMsgGetRotatorPosReq* pMsg = new GsmMsgGetRotatorPosReq();
+	pMsg->setDestination("ROTCTRL");
+	pMsg->setType(GSM_MSG_TYPE_GET_ROTATOR_POS_REQ);
+	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setTaskId(taskId);
+
+	GsmCommMgr::getInstance()->sendMsg(pMsg);
+
+	_task.getGetRotatePosRspTimer().start(10000, GsmTimer::ONCE);
+
+	return GSM_FSM_SUCCESS;
+}
+
+
+/*********************************************************************
+ *	Name:	onGetPosRsp
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateWfRotatorAligned::onGetRotatorPosRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
@@ -94,6 +114,8 @@ GsmTaskStateWfRotatorAligned::onQueryRotatorPosRsp(GsmTask& _task,
 
 	spdlog::info("GsmTaskStateWfRotatorAligned::onQueryRotatorPosRsp: entered...");
 
+	_task.getGetRotatePosRspTimer().stop();
+
 	// TODO: check whether the position matches the expected position
 
 	// TODO if not match start timer and remain in state
@@ -101,19 +123,7 @@ GsmTaskStateWfRotatorAligned::onQueryRotatorPosRsp(GsmTask& _task,
 	// TODO if match start timer to start recording
 
 
-#if 0
-	GsmMsg* pMsg = new GsmMsg();
-	pMsg->setDestination("ROTCTRL");
-	pMsg->setType(GSM_MSG_TYPE_MOVE_ROTATOR_REQ);
-	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
-
-
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
-#endif
-
-
-	// TODO start timer
-	_task.getRecordingDelayTimer().start(10, GsmTimer::ONCE);
+	_task.getRecordingDelayTimer().start(10000, GsmTimer::ONCE);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mRotatorAlignedState );
 

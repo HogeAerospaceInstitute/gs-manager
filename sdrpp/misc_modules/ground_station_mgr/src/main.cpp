@@ -316,7 +316,7 @@ private:
 
                 std::string taskStatus;
                 pTask->getStatus(taskStatus);
-                if (taskStatus != "Activated")
+                if (taskStatus == "INACTIVE")
                 {
                 	if (ImGui::Button("Activate"))
                 	{
@@ -332,7 +332,7 @@ private:
                 }
                 ImGui::SameLine();
 
-                std::string status = "   Status=" + taskStatus;
+                std::string status = "   State=" + taskStatus;
                 ImGui::Text(status.c_str());
         		ImGui::Separator();
         	}

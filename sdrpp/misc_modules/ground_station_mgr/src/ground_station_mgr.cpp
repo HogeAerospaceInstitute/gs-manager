@@ -127,9 +127,19 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleReloadPredictDbRsp(dynamic_cast<GsmMsgReloadPredictDbRsp*>(_msg));
 			break;
 		}
-		case GSM_MSG_TYPE_QUERY_ROTATOR_POS_RSP:
+		case GSM_MSG_TYPE_GET_ROTATOR_POS_RSP:
 		{
 			result = handleGetRotatorPosRsp(dynamic_cast<GsmMsgGetRotatorPosRsp*>(_msg));
+			break;
+		}
+		case GSM_MSG_TYPE_CHECK_ROTATOR_DELAY_TIMEOUT:
+		{
+			result = handleCheckRotatorDelayTimeout(dynamic_cast<GsmMsgTimeout*>(_msg));
+			break;
+		}
+		case GSM_MSG_TYPE_RECORDING_DELAY_TIMEOUT:
+		{
+			result = handleRecordingDelayTimeout(dynamic_cast<GsmMsgTimeout*>(_msg));
 			break;
 		}
 		default:
@@ -402,9 +412,12 @@ GsmResult_e GroundStationMgr::handleDeactivateTaskReq(GsmMsgDeactivateTaskReq* _
 	{
 		std::string status = "Idle";
 		pTask->setStatus(status);
-	}
 
-	// TODO: stop recording
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
 
 	return GSM_SUCCESS;
 }
@@ -795,6 +808,105 @@ GsmResult_e GroundStationMgr::handleGetRotatorPosRsp(GsmMsgGetRotatorPosRsp* _ms
 	return GSM_SUCCESS;
 }
 
+
+GsmResult_e GroundStationMgr::handleCheckRotatorDelayTimeout(GsmMsgTimeout* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+
+	_msg->getAppId(taskId);
+
+	spdlog::info("GroundStationMgr::handleCheckRotatorDelayTimeout: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleCheckRotatorDelayTimeout: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
+
+
+GsmResult_e GroundStationMgr::handleRecordingDelayTimeout(GsmMsgTimeout* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+
+	_msg->getAppId(taskId);
+
+	spdlog::info("GroundStationMgr::handleRecordingDelayTimeout: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleRecordingDelayTimeout: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
 
 
 GsmResult_e GroundStationMgr::writeTasksToFile(json& _tasks)
