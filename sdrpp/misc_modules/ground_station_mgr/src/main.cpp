@@ -310,7 +310,10 @@ private:
         	for (it = tasks.begin(); it != tasks.end(); ++it)
         	{
         		GsmTask* pTask = it->second;
-        		string taskStr;
+        		std::string taskStr;
+        		std::string uuid;
+
+        		pTask->getUuid(uuid);
         		pTask->print(taskStr);
         		ImGui::TextWrapped(taskStr.c_str());
 
@@ -318,14 +321,14 @@ private:
                 pTask->getStatus(taskStatus);
                 if (taskStatus == "INACTIVE")
                 {
-                	if (ImGui::Button("Activate"))
+                	if (ImGui::Button(CONCAT("Activate##_gsm_task_", uuid)))
                 	{
                 		_this->onButtonPushActivateTask(pTask);
                 	}
                 }
                 else
                 {
-                	if (ImGui::Button("Deactivate"))
+                	if (ImGui::Button(CONCAT("Deactivate##_gsm_task_", uuid)))
                 	{
                 		_this->onButtonPushDeactivateTask(pTask);
                 	}
@@ -373,18 +376,21 @@ private:
         	for (it = satellites.begin(); it != satellites.end(); ++it)
         	{
         		GsmSatellite* pSatellite = it->second;
-        		string satelliteStr;
+        		std::string satelliteName;
+        		std::string satelliteStr;
+
+        		pSatellite->getName(satelliteName);
         		pSatellite->print(satelliteStr);
         		ImGui::TextWrapped(satelliteStr.c_str());
 
-                if (ImGui::Button("Track"))
+                if (ImGui::Button(CONCAT("Track##_gsm_sat_name_", satelliteName)))
                 {
                     spdlog::info("GsManagerModule::menuHandler: track");
                 	_this->onButtonPushTrackSatellite(pSatellite);
                 }
                 ImGui::SameLine();
 
-                if (ImGui::Button("Get Position"))
+                if (ImGui::Button(CONCAT("Get Position##_gsm_sat_name_", satelliteName)))
                 {
                     spdlog::info("GsManagerModule::menuHandler: position");
                 	_this->onButtonPushGetSatellitePos(pSatellite);
@@ -400,7 +406,7 @@ private:
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("Move Rotator"))
+                if (ImGui::Button(CONCAT("Move Rotator##_gsm_sat_name_", satelliteName)))
                 {
                     spdlog::info("GsManagerModule::menuHandler: move rotator");
                 	_this->onButtonPushMoveRotator(pSatellite);
