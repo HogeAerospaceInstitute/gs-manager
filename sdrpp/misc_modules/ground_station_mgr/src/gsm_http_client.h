@@ -104,6 +104,7 @@ class GsmHttpClient : public GsmCommConsumer
 		GsmResult_e onShutdown();
 
 		GsmResult_e handleRefreshTasksReq(GsmMsg* _msg);
+		GsmResult_e handleUploadFileReq(GsmMsgHttpReq* _msg);
 
 
 	public:

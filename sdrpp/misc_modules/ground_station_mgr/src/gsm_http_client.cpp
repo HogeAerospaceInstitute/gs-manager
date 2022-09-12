@@ -80,6 +80,11 @@ GsmResult_e GsmHttpClient::onMessage(GsmMsg* _msg)
 			result = handleRefreshTasksReq(_msg);
 			break;
 		}
+		case GSM_MSG_TYPE_UPLOAD_FILE_REQ:
+		{
+			result = handleUploadFileReq(dynamic_cast<GsmMsgHttpReq*>(_msg));
+			break;
+		}
 		default:
 		{
 			// error
@@ -210,5 +215,80 @@ size_t GsmHttpClient::writeRspData(void* contents, size_t size, size_t nmemb, vo
 
 	spdlog::info("GsmHttpClient::writeRspData: size={0}, data={1}", realsize, s.c_str());
 	return realsize;
+}
+
+
+GsmResult_e GsmHttpClient::handleUploadFileReq(GsmMsgHttpReq* _msg)
+{
+	CURLcode res;
+	std::string file;
+	std::string url;
+	struct stat file_info;
+//	curl_off_t speed_upload, total_time;
+	FILE *fd;
+
+	_msg->getFile(file);
+
+	spdlog::info("GsmHttpClient::handleUploadFileReq: file={0}", file.c_str());
+
+	fd = fopen(file.c_str(), "rb");
+	if (!fd)
+	{
+        spdlog::warn("GsmHttpClient::handleUploadFileReq: failed to open file!");
+	    return GSM_FAILURE;
+	}
+
+	/* to get the file size */
+	if (fstat(fileno(fd), &file_info) != 0)
+	{
+        spdlog::warn("GsmHttpClient::handleUploadFileReq: fstat failed!");
+		return GSM_FAILURE;
+	}
+
+	mCurl = curl_easy_init();
+	if (mCurl == NULL)
+	{
+        spdlog::warn("GsmHttpClient::handleUploadFileReq: curl init failed!");
+		return GSM_FAILURE;
+	}
+
+ 	std::string webServer = gConfig.conf["web-server"];
+ 	std::string groundStationId = gConfig.conf["ground-station-id"];
+ 	url = "https://" + webServer + "/api/v1/ground_stations/" + groundStationId + "/tasks";
+
+	/* upload to this place */
+	curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(mCurl, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(mCurl, CURLOPT_READDATA, fd);
+    curl_easy_setopt(mCurl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
+	curl_easy_setopt(mCurl, CURLOPT_VERBOSE, 1L);
+
+	res = curl_easy_perform(mCurl);
+	if (res != CURLE_OK)
+	{
+	     fprintf(stderr, "curl_easy_perform() failed: %s\n",
+	              curl_easy_strerror(res));
+	}
+	else
+	{
+#if 0
+	      /* now extract transfer info */
+	      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed_upload);
+	      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total_time);
+
+	      fprintf(stderr, "Speed: %lu bytes/sec during %lu.%06lu seconds\n",
+	              (unsigned long)speed_upload,
+	              (unsigned long)(total_time / 1000000),
+	              (unsigned long)(total_time % 1000000));
+#endif
+	}
+
+	/* always cleanup */
+	curl_easy_cleanup(mCurl);
+	fclose(fd);
+
+	// TODO send response back
+
+	return GSM_SUCCESS;
 }
 

@@ -107,6 +107,8 @@ class GroundStationMgr : public GsmCommConsumer
 
 		GsmResult_e addSatellite(const string& _tle);
 
+		GsmResult_e processRecordings();
+
 
 	private:
 

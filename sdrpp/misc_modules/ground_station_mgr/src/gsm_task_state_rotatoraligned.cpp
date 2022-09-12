@@ -25,6 +25,8 @@
  *
  */
 
+#include <core.h>
+#include <recorder_interface.h>
 #include <signal_path/signal_path.h>
 
 #include <spdlog/spdlog.h>
@@ -52,6 +54,7 @@ GsmTaskStateRotatorAligned::onRecordingDelayTimeout(GsmTask& _task,
 
 	// start recording
 	sigpath::sourceManager.start();
+    core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_START, NULL, NULL);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mRecordingState );
 

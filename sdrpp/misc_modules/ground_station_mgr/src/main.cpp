@@ -294,6 +294,26 @@ private:
             gConfig.release(true);
         }
 
+        // Configure auto-upload-recordings
+        ImGui::LeftLabel("Auto-Upload Recordings");
+        if (!gConfig.conf.contains("auto-upload-recordings")) {
+            spdlog::info("GsManagerModule::menuHandler: setting auto-upload-records to default");
+            gConfig.acquire();
+            gConfig.conf["auto-upload-recordings"] = false;
+            gConfig.release(true);
+        }
+
+        bool autoUploadRecordingsEnabled = gConfig.conf["auto-upload-recordings"];
+//        spdlog::info("GsManagerModule::menuHandler: current auto-upload-recordings={0}",
+//        		autoUploadRecordingsEnabled);
+        if (ImGui::Checkbox("##Auto-Upload Recordings", &autoUploadRecordingsEnabled)) {
+            spdlog::info("GsManagerModule::menuHandler: set auto-upload-recordings={0}",
+            		autoUploadRecordingsEnabled);
+            gConfig.acquire();
+            gConfig.conf["auto-upload-recordings"] = autoUploadRecordingsEnabled;
+            gConfig.release(true);
+        }
+
         // Tasks Section
         textWidth   = ImGui::CalcTextSize("Tasks").x;
         ImGui::Separator();
@@ -419,6 +439,17 @@ private:
         {
         	ImGui::TextWrapped("No satellites are available.");
         }
+
+        // Recordings Section
+        textWidth   = ImGui::CalcTextSize("Recordings").x;
+        ImGui::Separator();
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text("Recordings");
+        ImGui::Separator();
+
+        // TODO display locallly stored recordings
+    	ImGui::TextWrapped("No recordings are available.");
+
     }
 
     std::string name;

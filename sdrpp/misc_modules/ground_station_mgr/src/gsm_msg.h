@@ -555,4 +555,41 @@ private:
 
 };
 
+
+class GsmMsgHttpReq : public GsmMsg
+{
+public:
+
+	GsmMsgHttpReq()  {}
+	virtual ~GsmMsgHttpReq() {}
+
+	void setURL(const std::string& _url)
+	{
+		mURL = _url;
+	}
+
+	void getURL(std::string& _url) const
+	{
+		_url = mURL;
+	}
+
+	void setFile(const std::string& _file)
+	{
+		mFile = _file;
+	}
+
+	void getFile(std::string& _file) const
+	{
+		_file = mFile;
+	}
+
+
+private:
+
+	std::string mURL;
+	std::string mFile;
+
+};
+
+
 #endif

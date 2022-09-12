@@ -32,6 +32,8 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
+#include <algorithm>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -259,6 +261,12 @@ GsmResult_e GroundStationMgr::handlePeriodicTimeout(GsmMsgTimeout* _msg)
 			pEvent->init(GSM_FSM_EVENT_ID_DEACTIVATE_TASK, "DEACTIVATE_TASK");
 			pTask->onEvent(*pEvent);
 		}
+	}
+
+	if (gConfig.conf["auto-upload-recordings"] == true)
+	{
+		// Check if any recorded files need to be uploaded
+		processRecordings();
 	}
 
 	// start the timer again
@@ -1040,69 +1048,32 @@ GsmResult_e GroundStationMgr::addSatellite(const string& _tle)
 }
 
 
-#if 0
-void handleHttpRsp() {
+GsmResult_e GroundStationMgr::processRecordings()
+{
+    const std::filesystem::path recordings{"/var/opt/hai/gsm/recordings"};
 
-	if (httpTxn.status == GSM_HTTP_TRANSACTION_STATE_COMPLETE) {
-		spdlog::info("GsManagerModule::handleHttpRsp: recv rsp");
+    // directory_iterator can be iterated using a range-for loop
+    for (auto const& dir_entry : std::filesystem::directory_iterator{recordings})
+    {
+		spdlog::info("GroundStationMgr::processRecordings: file={0}",
+					  dir_entry.path().c_str());
 
-		// TODO: clear existing list of tasks
-
-		if (httpTxn.rsp.data[0] != '\0') {
-			string tasksStr = httpTxn.rsp.data;
-
-			// parse into json object
-			json tasks = json::parse(tasksStr);
-
-		    for (const auto& item : tasks.items())
-		    {
-		    	std::stringstream buffer;
-		    	string tmpStr;
-		    	buffer << item.value();
-		    	tmpStr = buffer.str();
-	        	spdlog::info("GsManagerModule::handleHttpRsp: item={0}", tmpStr.c_str());
-
-	        	// allocate GsmTask
-				GsmTask* pTask = new GsmTask;
-
-				// fill in parameters
-				pTask->init(tmpStr);
-
-				string uuidStr;
-				pTask->getUuid(uuidStr);
-				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
-
-		        //std::cout << item.key() << "\n";
-		        //for (const auto& val : item.value().items())
-		        //{
-		        	//spdlog::info("GsManagerModule::handleHttpRsp: item={0}", item.value());
-		           // std::cout << "  " << val.key() << ": " << val.value() << "\n";
-		        //}
-		    }
-#if 0
-			// iterate the array
-			for (json::iterator it = tasks.begin(); it != tasks.end(); ++it) {
-
-				// allocate GsmTask
-				GsmTask* pTask = new GsmTask;
-
-				// fill in parameters
-				pTask->init(it->second);
-				json task = *it;
-				string uuidStr = task["UUID"];
-				mTasks.insert(std::pair<std::string, GsmTask*>(uuidStr, pTask));
-			}
-#endif
+		if (dir_entry.is_directory() == true)
+		{
+			spdlog::info("GroundStationMgr::processRecordings: skipping dir={0}",
+					dir_entry.path().c_str());
+			continue;
 		}
-		else {
-    		spdlog::error("GsManagerModule::handleHttpRsp: no data in rsp!");
-		}
+		GsmMsgHttpReq* pMsg = new GsmMsgHttpReq();
+		pMsg->setDestination("HTTPCLIENT");
+		pMsg->setType(GSM_MSG_TYPE_UPLOAD_FILE_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+		pMsg->setFile(dir_entry.path().c_str());
 
-		// reset httpTxn
-		memset(&httpTxn, 0, sizeof(GsmHttpTransaction_t));
-		httpTxn.status = GSM_HTTP_TRANSACTION_STATE_NULL;
-	}
+		GsmCommMgr::getInstance()->sendMsg(pMsg);
+    }
 
+
+	return GSM_SUCCESS;
 }
-#endif
 

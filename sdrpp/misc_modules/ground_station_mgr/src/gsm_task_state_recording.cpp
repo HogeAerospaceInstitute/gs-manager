@@ -25,6 +25,8 @@
  *
  */
 
+#include <core.h>
+#include <recorder_interface.h>
 #include <signal_path/signal_path.h>
 
 #include <spdlog/spdlog.h>
@@ -45,15 +47,12 @@ GsmTaskStateRecording::onStopRecording(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	std::string tle;
-	std::string satelliteName;
-
-	// GsmMsg* pMsg = _event.getMsg();
 
 	spdlog::info("GsmTaskStateInactive::onStopRecording: entered...");
 
 
-	// TODO: send message to start recording
+	sigpath::sourceManager.stop();
+    core::modComManager.callInterface("recorder", RECORDER_IFACE_CMD_STOP, NULL, NULL);
 
 
 	// TODO start timer
@@ -80,10 +79,9 @@ GsmTaskStateRecording::onDeactivate(GsmTask& _task,
 
 	spdlog::info("GsmTaskStateRecording::onDeactivate: entered...");
 
-
 	// stop recording
 	sigpath::sourceManager.stop();
-
+    core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_STOP, NULL, NULL);
 
 	_fsm.setState( (BaseState<GsmTask>*)&mInactiveState );
 
