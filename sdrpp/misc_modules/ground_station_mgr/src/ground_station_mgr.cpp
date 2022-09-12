@@ -33,6 +33,7 @@
 #include <sstream>
 #include <fstream>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include <config.h>
@@ -67,6 +68,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 
 	switch (_msg->getType())
 	{
+		case GSM_MSG_TYPE_PERIODIC_TIMEOUT:
+		{
+			result = handlePeriodicTimeout(dynamic_cast<GsmMsgTimeout*>(_msg));
+			break;
+		}
 		case GSM_MSG_TYPE_REFRESH_TASKS_REQ:
 		{
 			result = handleRefreshTasksReq(_msg);
@@ -195,6 +201,10 @@ GsmResult_e GroundStationMgr::onStart()
 		addSatellite(tle);
     }
 
+	// Start the periodic timer
+	mPeriodicTimer.init("GSMGR", "GroundStationMgr", GSM_MSG_TYPE_PERIODIC_TIMEOUT);
+	mPeriodicTimer.start(60000, GsmTimer::ONCE);
+
 	return GSM_SUCCESS;
 }
 
@@ -202,6 +212,58 @@ GsmResult_e GroundStationMgr::onStart()
 GsmResult_e GroundStationMgr::onShutdown()
 {
 	spdlog::info("GroundStationMgr::onShutdown: entered...");
+	return GSM_SUCCESS;
+}
+
+
+GsmResult_e GroundStationMgr::handlePeriodicTimeout(GsmMsgTimeout* _msg)
+{
+	GsmTask* pTask = NULL;
+    time_t now = std::time(0);
+
+	spdlog::info("GroundStationMgr::handlePeriodicTimeout: now={0}", now);
+
+	mPeriodicTimer.onTimeout();
+
+    // Loop through all tasks and check if any task should be started
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it)
+	{
+		std::string status;
+		std::string taskId;
+
+		if ((pTask = it->second) == NULL)
+		{
+			continue;
+		}
+
+		pTask->getUuid(taskId);
+		spdlog::info("GroundStationMgr::handlePeriodicTimeout: task={0}, start-time={1}, end-time={2}",
+				taskId.c_str(), pTask->getStartTime(), pTask->getEndTime());
+
+		pTask->getStatus(status);
+		if ((status != "Activated") &&
+			((now > pTask->getStartTime()) &&
+			 (now < pTask->getEndTime())))
+		{
+			// Send Activate event to state machine
+			GsmEvent* pEvent = new GsmEvent();
+			pEvent->init(GSM_FSM_EVENT_ID_ACTIVATE_TASK, "ACTIVATE_TASK");
+			pTask->onEvent(*pEvent);
+		}
+		else if ((status == "Activated") &&
+				 ((now > pTask->getEndTime())))
+		{
+			// Send Deactivate event to state machine
+			GsmEvent* pEvent = new GsmEvent();
+			pEvent->init(GSM_FSM_EVENT_ID_DEACTIVATE_TASK, "DEACTIVATE_TASK");
+			pTask->onEvent(*pEvent);
+		}
+	}
+
+	// start the timer again
+	mPeriodicTimer.start(60000, GsmTimer::ONCE);
+
 	return GSM_SUCCESS;
 }
 

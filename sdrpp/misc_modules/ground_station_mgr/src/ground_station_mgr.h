@@ -93,6 +93,8 @@ class GroundStationMgr : public GsmCommConsumer
 		GsmResult_e handleCheckRotatorDelayTimeout(GsmMsgTimeout* _msg);
 		GsmResult_e handleRecordingDelayTimeout(GsmMsgTimeout* _msg);
 
+		GsmResult_e handlePeriodicTimeout(GsmMsgTimeout* _msg);
+
 
 		GsmResult_e handleReloadPredictDbRsp(GsmMsgReloadPredictDbRsp* _msg);
 
@@ -111,6 +113,7 @@ class GroundStationMgr : public GsmCommConsumer
 	    std::map<string, GsmTask*> mTasks;
 	    std::map<string, GsmSatellite*> mSatellites;
 
+	    GsmTimer mPeriodicTimer;
 
 };
 

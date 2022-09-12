@@ -78,6 +78,19 @@ class GsmTask
 			mStatus = _status;
 		}
 
+		time_t getStartTime() const
+		{
+			return mStartTime;
+		}
+
+		time_t getEndTime() const
+		{
+			return mEndTime;
+		}
+
+
+	public:
+
 		GsmTimer& getTrackSatelliteRspTimer() { return mTrackSatelliteRspTimer; }
 		GsmTimer& getGetSatellitePosRspTimer() { return mGetSatellitePosRspTimer; }
 		GsmTimer& getMoveRotatorRspTimer() { return mMoveRotatorRspTimer; }

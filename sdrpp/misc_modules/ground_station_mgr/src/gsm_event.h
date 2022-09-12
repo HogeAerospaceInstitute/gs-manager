@@ -69,8 +69,8 @@ class GsmEvent : public BaseEvent
 
 		virtual ~GsmEvent() {}
 
-		GsmResult_e init( const GsmMsg& _msg );
-
+		GsmResult_e init(const GsmMsg& _msg);
+		GsmResult_e init(GsmFSMEventId_e _id, std::string _name);
 
 		void* getData() const { return mData; }
 		void setData( void* _data ) { mData = _data; }

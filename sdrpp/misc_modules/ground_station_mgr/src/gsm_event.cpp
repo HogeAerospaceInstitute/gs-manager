@@ -71,11 +71,20 @@ GsmEvent::GsmEvent( const GsmMsg& _msg ) : BaseEvent()
 
 
 GsmResult_e
-GsmEvent::init( const GsmMsg& _msg )
+GsmEvent::init(const GsmMsg& _msg)
 {
 	mId = convertMsgTypeToEventId( _msg.getType() );
 	mName = convertEventIdToStr((GsmFSMEventId_e)mId);
 	mData = (void*)&_msg;
+
+	return GSM_SUCCESS;
+}
+
+GsmResult_e
+GsmEvent::init(GsmFSMEventId_e _id, std::string _name)
+{
+	mId = _id;
+	mName = _name;
 
 	return GSM_SUCCESS;
 }
