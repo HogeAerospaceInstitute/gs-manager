@@ -47,8 +47,6 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 	std::string azimuth;
 	std::string elevation;
 
-	spdlog::info("GsmTaskStateWfGetPosRsp::onGetPosRsp: entered...");
-
 	_task.getGetSatellitePosRspTimer().stop();
 
 	_task.getUuid(taskId);
@@ -57,6 +55,13 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
     GsmMsgGetSatellitePosRsp* pRsp = (GsmMsgGetSatellitePosRsp*)_event.getMsg();
     pRsp->getAzimuth(azimuth);
     pRsp->getElevation(elevation);
+
+	spdlog::info("GsmTaskStateWfGetPosRsp::onGetPosRsp: azimuth={0}, elevation={1}",
+			azimuth.c_str(), elevation.c_str());
+
+    // save the target az/el in the task
+    _task.setAzimuth(azimuth);
+    _task.setElevation(elevation);
 
     // send message to move rotator
     GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
@@ -67,7 +72,7 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 	pMsg->setAzimuth(azimuth);
 	pMsg->setElevation(elevation);
 
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
+	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
 
 	_task.getMoveRotatorRspTimer().start(10000, GsmTimer::ONCE);
 

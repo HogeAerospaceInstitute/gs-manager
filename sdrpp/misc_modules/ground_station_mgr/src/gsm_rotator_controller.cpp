@@ -115,6 +115,7 @@ GsmResult_e GsmRotatorController::onShutdown()
 
 GsmResult_e GsmRotatorController::handleTrackSatelliteReq(GsmMsg* _msg)
 {
+	std::string rsp;
     std::string az = "0";
     std::string el = "0";
 
@@ -124,7 +125,7 @@ GsmResult_e GsmRotatorController::handleTrackSatelliteReq(GsmMsg* _msg)
 
     // Send command to rotctld
     std::string rotcommand = "P " + az + " " + el;
-    sendCommandToRotctld(rotcommand);
+    sendCommandToRotctld(rotcommand, rsp);
 
 	return GSM_SUCCESS;
 }
@@ -212,7 +213,7 @@ GsmResult_e GsmRotatorController::handleReloadPredictDbReq(GsmMsgReloadPredictDb
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 	pMsg->setTaskId(taskId);
 
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
+	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
 
 	return GSM_SUCCESS;
 }
@@ -221,6 +222,7 @@ GsmResult_e GsmRotatorController::handleReloadPredictDbReq(GsmMsgReloadPredictDb
 GsmResult_e GsmRotatorController::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
 {
 	std::string taskId;
+	std::string rsp;
     std::string az;
     std::string el;
 
@@ -233,7 +235,7 @@ GsmResult_e GsmRotatorController::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _ms
 
     // Send move/position command to rotctld
     std::string rotcommand = "P " + az + " " + el;
-    sendCommandToRotctld(rotcommand);
+    sendCommandToRotctld(rotcommand, rsp);
 
     // TODO: fill in success/failure in response
 
@@ -245,7 +247,7 @@ GsmResult_e GsmRotatorController::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _ms
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 	pMsg->setTaskId(taskId);
 
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
+	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
 
 	return GSM_SUCCESS;
 }
@@ -253,7 +255,9 @@ GsmResult_e GsmRotatorController::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _ms
 
 GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq* _msg)
 {
+	GsmResult_e result = GSM_SUCCESS;
 	std::string taskId;
+	std::string rsp;
 
     _msg->getTaskId(taskId);
 
@@ -261,8 +265,8 @@ GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq*
 			taskId.c_str());
 
     // Send get position command to rotctld
-    std::string rotcommand = "p";
-    sendCommandToRotctld(rotcommand);
+    std::string rotcommand = "get_pos";
+    result = sendCommandToRotctld(rotcommand, rsp);
 
     // send response
 	GsmMsgGetRotatorPosRsp* pMsg = new GsmMsgGetRotatorPosRsp();
@@ -272,9 +276,22 @@ GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq*
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 	pMsg->setTaskId(taskId);
 
-    // TODO: fill in success/failure in response
+    // parse the response
+	if (result == GSM_SUCCESS)
+	{
+		std::stringstream responseSS(rsp);
+		std::istream_iterator<std::string> begin(responseSS);
+		std::istream_iterator<std::string> end;
+		std::vector<std::string> tokens(begin, end);
 
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
+		std::string az = tokens[0];
+		std::string el = tokens[1];
+
+		pMsg->setAzimuth(az);
+		pMsg->setElevation(el);
+	}
+
+	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
 
 	return GSM_SUCCESS;
 }
@@ -370,13 +387,15 @@ GsmResult_e GsmRotatorController::sendCommand(const std::string& _cmd,
  * 				will block waiting for the response from the server.
  *
  * @param[in]   _cmd	String which contains the command to be sent.
+ * @param[out]  _rsp	String which contains the response from the rotator
  *
  * @return      The return code whether the operation was successful or failed.
  *
  * @retval      GSM_SUCCESS		The function is successfully executed
  * @retval      GSM_FAILURE		An error occurred
  */
-GsmResult_e GsmRotatorController::sendCommandToRotctld(const std::string& _cmd)
+GsmResult_e GsmRotatorController::sendCommandToRotctld(const std::string& _cmd,
+													   std::string& _rsp)
 {
 	int valread;
 	int socketFd;

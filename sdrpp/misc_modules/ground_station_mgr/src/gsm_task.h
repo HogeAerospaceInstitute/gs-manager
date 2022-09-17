@@ -88,6 +88,26 @@ class GsmTask
 			return mEndTime;
 		}
 
+		void setAzimuth(const std::string& _azimuth)
+		{
+			mAzimuth = _azimuth;
+		}
+
+		void getAzimuth(std::string& _azimuth)
+		{
+			_azimuth = mAzimuth;
+		}
+
+		void setElevation(const std::string& _elevation)
+		{
+			mElevation = _elevation;
+		}
+
+		void getElevation(std::string& _elevation)
+		{
+			_elevation = mElevation;
+		}
+
 
 	public:
 
@@ -106,6 +126,9 @@ class GsmTask
 
 		time_t mStartTime;
 		time_t mEndTime;
+
+		std::string mAzimuth;
+		std::string mElevation;
 
 		double mFrequency;
 

@@ -74,7 +74,8 @@ class GsmRotatorController : public GsmCommConsumer
 
 		GsmResult_e sendCommand(const std::string& _cmd,
 								std::string& _rsp);
-		GsmResult_e sendCommandToRotctld(const std::string& _cmd);
+		GsmResult_e sendCommandToRotctld(const std::string& _cmd,
+										 std::string& _rsp);
 
 
 };

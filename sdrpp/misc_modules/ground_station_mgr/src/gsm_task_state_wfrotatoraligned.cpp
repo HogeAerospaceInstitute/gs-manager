@@ -29,7 +29,7 @@
 
 #include "gsm_task_state_wfrotatoraligned.h"
 #include "gsm_comm_mgr.h"
-
+#include "gsm_msg.h"
 
 
 /*********************************************************************
@@ -44,19 +44,14 @@ GsmTaskStateWfRotatorAligned::onMoveRotatorRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	std::string taskId;
-	std::string tle;
-	std::string satelliteName;
-
 	GsmMsgMoveRotatorRsp* pRsp = (GsmMsgMoveRotatorRsp*)_event.getMsg();
 
-	spdlog::info("GsmTaskStateWfRotatorAligned::onMoveRotatorRsp: entered...");
+	spdlog::info("GsmTaskStateWfRotatorAligned::onMoveRotatorRsp: entered");
+
+	// TODO: check the result
 
 	_task.getMoveRotatorRspTimer().stop();
-
-	pRsp->getTaskId(taskId);
-
-	_task.getCheckRotatorDelayTimer().start(10000, GsmTimer::ONCE);
+	_task.getCheckRotatorDelayTimer().start(5000, GsmTimer::ONCE);
 
 	return GSM_FSM_SUCCESS;
 }
@@ -87,7 +82,7 @@ GsmTaskStateWfRotatorAligned::onCheckRotatorDelayTimeout(GsmTask& _task,
 	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
 	pMsg->setTaskId(taskId);
 
-	GsmCommMgr::getInstance()->sendMsg(pMsg);
+	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
 
 	_task.getGetRotatePosRspTimer().start(10000, GsmTimer::ONCE);
 
@@ -107,25 +102,36 @@ GsmTaskStateWfRotatorAligned::onGetRotatorPosRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	std::string tle;
-	std::string satelliteName;
+	std::string targetAzimuth;
+	std::string targetElevation;
+	std::string currentAzimuth;
+	std::string currentElevation;
 
-	// GsmMsg* pMsg = _event.getMsg();
-
-	spdlog::info("GsmTaskStateWfRotatorAligned::onQueryRotatorPosRsp: entered...");
+	GsmMsgGetRotatorPosRsp* pMsg = (GsmMsgGetRotatorPosRsp*)_event.getMsg();
 
 	_task.getGetRotatePosRspTimer().stop();
 
-	// TODO: check whether the position matches the expected position
+	// check whether the position matches the expected position
+	_task.getAzimuth(targetAzimuth);
+	_task.getElevation(targetElevation);
 
-	// TODO if not match start timer and remain in state
+	pMsg->getAzimuth(currentAzimuth);
+	pMsg->getElevation(currentElevation);
 
-	// TODO if match start timer to start recording
+	spdlog::info("GsmTaskStateWfRotatorAligned::onGetRotatorPosRsp: azimuth={0}, elevation={1}",
+			currentAzimuth.c_str(), currentElevation.c_str());
 
-
-	_task.getRecordingDelayTimer().start(10000, GsmTimer::ONCE);
-
-	_fsm.setState( (BaseState<GsmTask>*)&mRotatorAlignedState );
+	if ((currentAzimuth == targetAzimuth) &&
+		(currentElevation == targetElevation))
+	{
+		// rotator is aligned
+		_task.getRecordingDelayTimer().start(10000, GsmTimer::ONCE);
+		_fsm.setState( (BaseState<GsmTask>*)&mRotatorAlignedState );
+	}
+	else
+	{
+		_task.getCheckRotatorDelayTimer().start(5000, GsmTimer::ONCE);
+	}
 
 	return GSM_FSM_SUCCESS;
 }
