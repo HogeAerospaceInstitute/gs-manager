@@ -25,6 +25,7 @@
 #include <config.h>
 #include <curl.h>
 #include <thread>
+#include <filesystem>
 
 #include <signal_path/signal_path.h>
 #include <signal_path/source.h>
@@ -239,6 +240,18 @@ private:
     	GsmCommMgr::getInstance()->sendMsg(pMsg);
     }
 
+    void onButtonPushUploadRecordings()
+    {
+		spdlog::info("GsManagerModule::onButtonPushUploadRecordings: entered");
+
+		GsmMsg* pMsg = new GsmMsg();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_UPLOAD_RECORDINGS_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+    	GsmCommMgr::getInstance()->sendMsg(pMsg);
+    }
+
 
     static void menuHandler(void* ctx)
     {
@@ -250,6 +263,7 @@ private:
 
         // Configuration Section
         auto textWidth   = ImGui::CalcTextSize("Configuration").x;
+        ImGui::Separator();
         ImGui::Separator();
         ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
         ImGui::Text("Configuration");
@@ -330,12 +344,13 @@ private:
             gConfig.conf["auto-upload-recordings"] = autoUploadRecordingsEnabled;
             gConfig.release(true);
         }
+        ImGui::Separator();
 
         // Ground Station Details Section
-        textWidth   = ImGui::CalcTextSize("Ground Station Info").x;
+        textWidth   = ImGui::CalcTextSize("Ground Station Info and Location").x;
         ImGui::Separator();
         ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-        ImGui::Text("Ground Station Details");
+        ImGui::Text("Ground Station Info and Location");
         ImGui::Separator();
 
         // Latitude and Longitude
@@ -359,6 +374,7 @@ private:
         if (ImGui::Button("Update")) {
         	_this->onButtonPushUpdateGroundStationInfo();
         }
+        ImGui::Separator();
 
         // Tasks Section
         textWidth   = ImGui::CalcTextSize("Tasks").x;
@@ -425,6 +441,7 @@ private:
         if (ImGui::Button("Clear Tasks")) {
         	_this->onButtonPushClearTasks();
         }
+        ImGui::Separator();
 
         // Satellites Section
         textWidth   = ImGui::CalcTextSize("Satellites").x;
@@ -484,6 +501,7 @@ private:
         else
         {
         	ImGui::TextWrapped("No satellites are available.");
+            ImGui::Separator();
         }
 
         // Recordings Section
@@ -493,9 +511,30 @@ private:
         ImGui::Text("Recordings");
         ImGui::Separator();
 
-        // TODO display locally stored recordings
-    	ImGui::TextWrapped("No recordings are available.");
+        const std::filesystem::path recordings{"/var/opt/hai/gsm/recordings"};
+        int numFiles = 0;
+        for (auto const& dir_entry : std::filesystem::directory_iterator{recordings})
+        {
+    		if (dir_entry.is_directory() == true)
+    		{
+    			continue;
+    		}
+    		ImGui::Text(dir_entry.path().c_str());
+    		numFiles++;
+        }
 
+        if (numFiles == 0)
+        {
+        	ImGui::Text("No recordings are available.");
+        }
+        else
+        {
+            ImGui::Separator();
+            if (ImGui::Button("Upload Recordings")) {
+            	_this->onButtonPushUploadRecordings();
+            }
+            ImGui::Separator();
+        }
     }
 
     std::string name;

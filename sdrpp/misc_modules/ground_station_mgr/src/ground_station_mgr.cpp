@@ -160,6 +160,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleGetGroundStationInfoRsp(_msg);
 			break;
 		}
+		case GSM_MSG_TYPE_UPLOAD_RECORDINGS_REQ:
+		{
+			result = processRecordings();
+			break;
+		}
 		default:
 		{
 			spdlog::error("GroundStationMgr::onMessage: unknown msg!!");
