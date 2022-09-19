@@ -105,6 +105,7 @@ class GsmHttpClient : public GsmCommConsumer
 
 		GsmResult_e handleRefreshTasksReq(GsmMsg* _msg);
 		GsmResult_e handleUploadFileReq(GsmMsgHttpReq* _msg);
+		GsmResult_e handleGetGroundStationInfoReq(GsmMsg* _msg);
 
 
 	public:

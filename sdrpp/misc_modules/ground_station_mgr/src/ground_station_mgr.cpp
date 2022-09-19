@@ -150,9 +150,19 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleRecordingDelayTimeout(dynamic_cast<GsmMsgTimeout*>(_msg));
 			break;
 		}
+		case GSM_MSG_TYPE_GET_GROUND_STATION_INFO_REQ:
+		{
+			result = handleGetGroundStationInfoReq(_msg);
+			break;
+		}
+		case GSM_MSG_TYPE_GET_GROUND_STATION_INFO_RSP:
+		{
+			result = handleGetGroundStationInfoRsp(_msg);
+			break;
+		}
 		default:
 		{
-			// error
+			spdlog::error("GroundStationMgr::onMessage: unknown msg!!");
 			break;
 		}
 	}
@@ -973,6 +983,74 @@ GsmResult_e GroundStationMgr::handleRecordingDelayTimeout(GsmMsgTimeout* _msg)
 		GsmEvent* pEvent = new GsmEvent();
 		pEvent->init(*_msg);
 		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
+
+GsmResult_e GroundStationMgr::handleGetGroundStationInfoReq(GsmMsg* _msg)
+{
+	spdlog::info("GroundStationMgr::handleGetGroundStationInfoReq: entered");
+
+	GsmMsg* pMsg = new GsmMsg();
+	pMsg->setDestination("HTTPCLIENT");
+	pMsg->setType(GSM_MSG_TYPE_GET_GROUND_STATION_INFO_REQ);
+	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+	GsmCommMgr::getInstance()->sendMsg(pMsg);
+	return GSM_SUCCESS;
+}
+
+
+GsmResult_e GroundStationMgr::handleGetGroundStationInfoRsp(GsmMsg* _msg)
+{
+	json gsInfo;
+
+	spdlog::info("GroundStationMgr::handleGetGroundStationInfoRsp: entered...");
+
+	std::string rspData = _msg->getData();
+
+	spdlog::info("GroundStationMgr::handleGetGroundStationInfoRsp: info={0}",
+			rspData.c_str());
+
+	try
+	{
+		gsInfo = json::parse(rspData);
+	}
+	catch (json::parse_error& ex)
+	{
+		spdlog::warn("GroundStationMgr::handleGetGroundStationInfoRsp: failed to parse rsp");
+		return GSM_FAILURE;
+	}
+
+	try
+	{
+		mGroundStationName = gsInfo["name"];
+	}
+	catch (json::type_error& ex)
+	{
+		spdlog::warn("GroundStationMgr::handleGetGroundStationInfoRsp: type error");
+		return GSM_FAILURE;
+	}
+
+	try
+	{
+		mLongitude = gsInfo["lng"];
+	}
+	catch (json::type_error& ex)
+	{
+		spdlog::warn("GroundStationMgr::handleGetGroundStationInfoRsp: type error");
+		return GSM_FAILURE;
+	}
+
+	try
+	{
+		mLatitude = gsInfo["lat"];
+	}
+	catch (json::type_error& ex)
+	{
+		spdlog::warn("GroundStationMgr::handleGetGroundStationInfoRsp: type error");
+		return GSM_FAILURE;
 	}
 
 	return GSM_SUCCESS;

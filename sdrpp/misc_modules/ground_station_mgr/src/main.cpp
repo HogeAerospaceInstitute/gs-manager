@@ -227,6 +227,18 @@ private:
     	GsmCommMgr::getInstance()->sendMsg(pMsg);
     }
 
+    void onButtonPushUpdateGroundStationInfo()
+    {
+		spdlog::info("GsManagerModule::onButtonPushUpdateGroundStationInfo: entered");
+
+		GsmMsg* pMsg = new GsmMsg();
+		pMsg->setDestination("GSMGR");
+		pMsg->setType(GSM_MSG_TYPE_GET_GROUND_STATION_INFO_REQ);
+		pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+
+    	GsmCommMgr::getInstance()->sendMsg(pMsg);
+    }
+
 
     static void menuHandler(void* ctx)
     {
@@ -304,14 +316,41 @@ private:
         }
 
         bool autoUploadRecordingsEnabled = gConfig.conf["auto-upload-recordings"];
-//        spdlog::info("GsManagerModule::menuHandler: current auto-upload-recordings={0}",
-//        		autoUploadRecordingsEnabled);
         if (ImGui::Checkbox("##Auto-Upload Recordings", &autoUploadRecordingsEnabled)) {
             spdlog::info("GsManagerModule::menuHandler: set auto-upload-recordings={0}",
             		autoUploadRecordingsEnabled);
             gConfig.acquire();
             gConfig.conf["auto-upload-recordings"] = autoUploadRecordingsEnabled;
             gConfig.release(true);
+        }
+
+        // Ground Station Details Section
+        textWidth   = ImGui::CalcTextSize("Ground Station Info").x;
+        ImGui::Separator();
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text("Ground Station Details");
+        ImGui::Separator();
+
+        // Latitude and Longitude
+        ImGui::LeftLabel("Name: ");
+        std::string gsName;
+        GroundStationMgr::getInstance()->getGroundStationName(gsName);
+        ImGui::Text(gsName.c_str());
+
+        // Latitude and Longitude
+        ImGui::LeftLabel("Latitude: ");
+        std::string latitude;
+        GroundStationMgr::getInstance()->getLatitude(latitude);
+        ImGui::Text(latitude.c_str());
+
+        ImGui::LeftLabel("Longitude: ");
+        std::string longitude;
+        GroundStationMgr::getInstance()->getLongitude(longitude);
+        ImGui::Text(longitude.c_str());
+
+        ImGui::Separator();
+        if (ImGui::Button("Update")) {
+        	_this->onButtonPushUpdateGroundStationInfo();
         }
 
         // Tasks Section
@@ -447,7 +486,7 @@ private:
         ImGui::Text("Recordings");
         ImGui::Separator();
 
-        // TODO display locallly stored recordings
+        // TODO display locally stored recordings
     	ImGui::TextWrapped("No recordings are available.");
 
     }

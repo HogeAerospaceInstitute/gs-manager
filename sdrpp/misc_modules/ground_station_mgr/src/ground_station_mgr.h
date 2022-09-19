@@ -65,6 +65,21 @@ class GroundStationMgr : public GsmCommConsumer
 			_satellites = mSatellites;
 		}
 
+		void getGroundStationName(std::string& _name )
+		{
+			_name = mGroundStationName;
+		}
+
+		void getLatitude(std::string& _latitude)
+		{
+			_latitude = mLatitude;
+		}
+
+		void getLongitude(std::string& _longitude)
+		{
+			_longitude = mLongitude;
+		}
+
 
 	private:
 
@@ -78,6 +93,8 @@ class GroundStationMgr : public GsmCommConsumer
 		GsmResult_e handleRefreshTasksReq(GsmMsg* _msg);
 		GsmResult_e handleRefreshTasksRsp(GsmMsg* _msg);
 		GsmResult_e handleClearTasksReq(GsmMsg* _msg);
+		GsmResult_e handleGetGroundStationInfoReq(GsmMsg* _msg);
+		GsmResult_e handleGetGroundStationInfoRsp(GsmMsg* _msg);
 
 		GsmResult_e handleActivateTaskReq(GsmMsgActivateTaskReq* _msg);
 		GsmResult_e handleDeactivateTaskReq(GsmMsgDeactivateTaskReq* _msg);
@@ -110,12 +127,17 @@ class GroundStationMgr : public GsmCommConsumer
 		GsmResult_e processRecordings();
 
 
+
 	private:
 
 	    std::map<string, GsmTask*> mTasks;
 	    std::map<string, GsmSatellite*> mSatellites;
 
 	    GsmTimer mPeriodicTimer;
+
+	    std::string mGroundStationName;
+	    std::string mLatitude;
+	    std::string mLongitude;
 
 };
 

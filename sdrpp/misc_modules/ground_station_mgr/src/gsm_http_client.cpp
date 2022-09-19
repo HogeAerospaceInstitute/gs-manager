@@ -85,6 +85,11 @@ GsmResult_e GsmHttpClient::onMessage(GsmMsg* _msg)
 			result = handleUploadFileReq(dynamic_cast<GsmMsgHttpReq*>(_msg));
 			break;
 		}
+		case GSM_MSG_TYPE_GET_GROUND_STATION_INFO_REQ:
+		{
+			result = handleGetGroundStationInfoReq(_msg);
+			break;
+		}
 		default:
 		{
 			// error
@@ -145,6 +150,42 @@ GsmResult_e GsmHttpClient::handleRefreshTasksReq(GsmMsg* _msg)
  	spdlog::info("GsmHttpClient::handleRefreshTasksReq: exiting...");
  	return GSM_SUCCESS;
  }
+
+
+GsmResult_e GsmHttpClient::handleGetGroundStationInfoReq(GsmMsg* _msg)
+{
+
+	spdlog::info("GsmHttpClient::handleGetGroundStationInfoReq: entering...");
+
+	// "https://bowshock.onrender.com/api/ground_stations/ae78f216-d97a-4612-8f06-ab14d2dbc22a/tasks");
+
+ 	// Fill in HTTP transaction message
+	mHttpTxn.req.method = "GET";
+ 	std::string webServer = gConfig.conf["web-server"];
+ 	std::string groundStationId = gConfig.conf["ground-station-id"];
+ 	mHttpTxn.req.url = "https://" + webServer + "/api/v1/ground_station/" + groundStationId;
+
+ 	init(mHttpTxn);
+ 	send();
+
+ 	mHttpTxn.status = GSM_HTTP_TRANSACTION_STATE_COMPLETE;
+
+ 	// respond back to GsmMgr thread
+	GsmMsg* pMsg = new GsmMsg();
+	pMsg->setDestination("GSMGR");
+	pMsg->setType(GSM_MSG_TYPE_GET_GROUND_STATION_INFO_RSP);
+	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setData(mHttpTxn.rsp.data, strlen(mHttpTxn.rsp.data));
+
+	GsmCommMgr::getInstance()->sendMsg(pMsg);
+
+	// clear data
+	memset(&mHttpTxn.rsp.data, 0, GSM_MAX_HTTP_DATA_SIZE);
+
+ 	spdlog::info("GsmHttpClient::handleRefreshTasksReq: exiting...");
+ 	return GSM_SUCCESS;
+ }
+
 
 
 int GsmHttpClient::init(GsmHttpTransaction_t& _txn)
