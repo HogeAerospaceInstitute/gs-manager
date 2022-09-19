@@ -44,7 +44,7 @@ GsmTaskStateWfRotatorAligned::onMoveRotatorRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	GsmMsgMoveRotatorRsp* pRsp = (GsmMsgMoveRotatorRsp*)_event.getMsg();
+//	GsmMsgMoveRotatorRsp* pRsp = (GsmMsgMoveRotatorRsp*)_event.getMsg();
 
 	spdlog::info("GsmTaskStateWfRotatorAligned::onMoveRotatorRsp: entered");
 
@@ -132,6 +132,30 @@ GsmTaskStateWfRotatorAligned::onGetRotatorPosRsp(GsmTask& _task,
 	{
 		_task.getCheckRotatorDelayTimer().start(5000, GsmTimer::ONCE);
 	}
+
+	return GSM_FSM_SUCCESS;
+}
+
+
+/*********************************************************************
+ *	Name:	onDeactivate
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateWfRotatorAligned::onDeactivate(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+
+	spdlog::info("GsmTaskStateWfRotatorAligned::onDeactivate: entered");
+
+	_task.getGetRotatePosRspTimer().stop();
+	_task.getCheckRotatorDelayTimer().stop();
+
+	_fsm.setState( (BaseState<GsmTask>*)&mInactiveState );
 
 	return GSM_FSM_SUCCESS;
 }

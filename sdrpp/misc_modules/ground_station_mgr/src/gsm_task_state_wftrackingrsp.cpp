@@ -81,3 +81,26 @@ GsmTaskStateWfTrackingRsp::onReloadDbRsp(GsmTask& _task,
 	return GSM_FSM_SUCCESS;
 }
 
+
+/*********************************************************************
+ *	Name:	onDeactivate
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateWfTrackingRsp::onDeactivate(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+
+	spdlog::info("GsmTaskStateWfTrackingRsp::onDeactivate: entered");
+
+	_task.getTrackSatelliteRspTimer().stop();
+
+	_fsm.setState( (BaseState<GsmTask>*)&mInactiveState );
+
+	return GSM_FSM_SUCCESS;
+}
+

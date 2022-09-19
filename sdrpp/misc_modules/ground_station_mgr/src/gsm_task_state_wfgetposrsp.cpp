@@ -81,3 +81,26 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 	return GSM_FSM_SUCCESS;
 }
 
+
+/*********************************************************************
+ *	Name:	onDeactivate
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateWfGetPosRsp::onDeactivate(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+
+	spdlog::info("GsmTaskStateWfGetPosRsp::onDeactivate: entered");
+
+	_task.getGetSatellitePosRspTimer().stop();
+
+	_fsm.setState( (BaseState<GsmTask>*)&mInactiveState );
+
+	return GSM_FSM_SUCCESS;
+}
+

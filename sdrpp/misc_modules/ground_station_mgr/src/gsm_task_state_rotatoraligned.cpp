@@ -62,3 +62,25 @@ GsmTaskStateRotatorAligned::onRecordingDelayTimeout(GsmTask& _task,
 }
 
 
+/*********************************************************************
+ *	Name:	onDeactivate
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
+GsmTaskStateRotatorAligned::onDeactivate(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+
+	spdlog::info("GsmTaskStateRotatorAligned::onDeactivate: entered...");
+
+	_task.getRecordingDelayTimer().stop();
+
+	_fsm.setState( (BaseState<GsmTask>*)&mInactiveState );
+
+	return GSM_FSM_SUCCESS;
+}
+

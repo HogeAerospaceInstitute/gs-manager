@@ -56,6 +56,10 @@ class GsmTaskStateWfRotatorAligned : public GsmTaskStateBase
 										 GsmTask::GsmTaskFSM_t& _fsm,
 										 const GsmEvent& _event) const;
 
+		virtual GsmFSMResult_e onDeactivate(GsmTask& _task,
+										 GsmTask::GsmTaskFSM_t& _fsm,
+										 const GsmEvent& _event) const;
+
 
 	private:
 
