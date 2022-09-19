@@ -295,9 +295,16 @@ private:
             gConfig.release(true);
         }
 
-        // Configure auto-refresh
+        // Configure auto-refresh-tasks
         ImGui::LeftLabel("Auto-Refresh Tasks");
-        bool autoRefreshEnabled = true;
+        if (!gConfig.conf.contains("auto-refresh-tasks")) {
+            spdlog::info("GsManagerModule::menuHandler: setting auto-refresh-tasks to default");
+            gConfig.acquire();
+            gConfig.conf["auto-upload-recordings"] = true;
+            gConfig.release(true);
+        }
+
+        bool autoRefreshEnabled = gConfig.conf["auto-refresh-tasks"];
         if (ImGui::Checkbox("##Auto-Refresh Tasks", &autoRefreshEnabled)) {
             spdlog::info("GsManagerModule::menuHandler: set auto-refresh={0}",
             			 autoRefreshEnabled);
@@ -497,7 +504,17 @@ private:
 };
 
 MOD_EXPORT void _INIT_() {
-    // Nothing here
+	// Set default values
+    json def = json({});
+
+    def["ground-station-id"] = "ae78f216-d97a-4612-8f06-ab14d2dbc22a";
+    def["web-server"] = "bowshock.onrender.com";
+    def["auto-refresh-tasks"] = true;
+    def["auto-upload-recordings"] = false;
+
+    gConfig.setPath("/var/opt/hai/gsm/gsm_config.json");
+    gConfig.load(def);
+    gConfig.enableAutoSave();
 }
 
 MOD_EXPORT ModuleManager::Instance* _CREATE_INSTANCE_(std::string name) {
