@@ -10,6 +10,7 @@ set_target_properties(ground_station_mgr PROPERTIES PREFIX "")
 target_include_directories(ground_station_mgr PRIVATE "src/")
 target_include_directories(ground_station_mgr PRIVATE "src/spdlog")
 target_include_directories(ground_station_mgr PRIVATE "/usr/local/include/curl")
+target_include_directories(ground_station_mgr PRIVATE "../recorder/src")
 
 if (MSVC)
     target_compile_options(ground_station_mgr PRIVATE /O2 /Ob2 /std:c++17 /EHsc)
