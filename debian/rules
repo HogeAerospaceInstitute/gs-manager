@@ -7,9 +7,9 @@
 
 clean:
 	echo "cleaning..."
-	rm debian/files
-	rm debian/gsmgr.substvars
-	rm -rf debian/gsmgr
+#	rm debian/files
+#	rm debian/gsmgr.substvars
+#	rm -rf debian/gsmgr
 
 build:
 	echo "Building..." 
@@ -41,7 +41,8 @@ binary:
 	cp -r sdrpp/root/res/icons debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/themes debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	
-	cp hamlib/tests/rotctld debian/gsmgr/opt/hai/gsmgr/bin
+	cp hamlib/tests/.libs/rotctld debian/gsmgr/opt/hai/gsmgr/bin
+	cp hamlib/src/.libs/libhamlib.so.4 debian/gsmgr/opt/hai/gsmgr/lib
 	cp predict/predict debian/gsmgr/opt/hai/gsmgr/bin
 	cp sdrpp/build/sdrpp debian/gsmgr/opt/hai/gsmgr/bin
 	cp sdrpp/build/core/libsdrpp_core.so debian/gsmgr/opt/hai/gsmgr/lib
