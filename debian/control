@@ -1,0 +1,14 @@
+Source: gsmgr
+Section: unknown
+Priority: optional
+Maintainer: Hoge Aerospace Institute business@hoge-aerospace.com
+Build-Depends:
+Standards-Version: 4.1.4
+Homepage: <insert the upstream URL, if relevant>
+
+Package: gsmgr
+Architecture: amd64
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Hoge Aerospace Institute Ground Station Manager software
+ This Debian binary package is for the Hoge Aerospace Institute Ground Station Manager software.

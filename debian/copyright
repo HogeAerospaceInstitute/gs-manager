@@ -1,0 +1,60 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: gs
+Source: <url://example.com>
+#
+# Please double check copyright with the licensecheck(1) command.
+
+Files:     Makefile
+           sdrpp/misc_modules/ground_station_mgr/src/BaseStateMachine.h
+           sdrpp/misc_modules/ground_station_mgr/src/ground_station_mgr.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/ground_station_mgr.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_comm_consumer.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_comm_consumer.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_comm_mgr.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_comm_mgr.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_event.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_event.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_globals.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_http_client.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_http_client.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_msg.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_rotator_controller.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_rotator_controller.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_inactive.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_inactive.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_recording.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_recording.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_rotatoraligned.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_rotatoraligned.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_wfgetposrsp.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_wfgetposrsp.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_wfrotatoraligned.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_wfrotatoraligned.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_wftrackingrsp.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_wftrackingrsp.h
+           sdrpp/misc_modules/ground_station_mgr/src/main.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_satellite.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_base.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_task_state_base.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_timer.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_timer.h
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_timer_mgr.cpp
+           sdrpp/misc_modules/ground_station_mgr/src/gsm_timer_mgr.h
+Copyright: 2022 Hoge Aerospace Institute
+License:   __UNKNOWN__
+ This software is the confidential and proprietary information of the
+ Hoge Aerospace Institute.
+ .
+ Permission is hereby granted to licensees of Hoge Aerospace Institute
+ products to use or abstract this computer program for the sole purpose of
+ implementing a product based on Hoge Aerospace Institute products.  No
+ other rights to reproduce, use, or disseminate this computer program,
+ whether in part or in whole, are granted.
+ .
+ Hoge Aerospace Institute makes no representation or warranties with respect
+ to the performance of this computer program, and specifically disclaims any
+ responsibility for any damages, special or consequential, connected with
+ the use of this program.
+ 

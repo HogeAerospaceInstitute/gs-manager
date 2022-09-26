@@ -1,0 +1,56 @@
+#!/usr/bin/make -f
+# You must remove unused comment lines for the released package.
+#export DH_VERBOSE = 1
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+clean:
+	echo "cleaning..."
+	rm debian/files
+	rm debian/gsmgr.substvars
+	rm -rf debian/gsmgr
+
+build:
+	echo "Building..." 
+
+#override_dh_auto_install:
+#	dh_auto_install -- prefix=/usr
+
+#override_dh_install:
+#	dh_install --list-missing -X.pyc -X.pyo
+
+binary:
+	mkdir -p debian/gsmgr
+	mkdir -p debian/gsmgr/opt/hai
+	mkdir -p debian/gsmgr/opt/hai/gsmgr
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/bin
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/lib
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/bandplans
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/colormaps
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/fonts
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/icons
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/themes
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/recordings
+	
+	cp -r sdrpp/root/res/bandplans debian/gsmgr/opt/hai/gsmgr/sdrpp/res
+	cp -r sdrpp/root/res/colormaps debian/gsmgr/opt/hai/gsmgr/sdrpp/res
+	cp -r sdrpp/root/res/fonts debian/gsmgr/opt/hai/gsmgr/sdrpp/res
+	cp -r sdrpp/root/res/icons debian/gsmgr/opt/hai/gsmgr/sdrpp/res
+	cp -r sdrpp/root/res/themes debian/gsmgr/opt/hai/gsmgr/sdrpp/res
+	
+	cp hamlib/tests/rotctld debian/gsmgr/opt/hai/gsmgr/bin
+	cp predict/predict debian/gsmgr/opt/hai/gsmgr/bin
+	cp sdrpp/build/sdrpp debian/gsmgr/opt/hai/gsmgr/bin
+	cp sdrpp/build/core/libsdrpp_core.so debian/gsmgr/opt/hai/gsmgr/lib
+	cp sdrpp/build/misc_modules/ground_station_mgr/ground_station_mgr.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
+	cp sdrpp/build/misc_modules/recorder/recorder.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
+	cp sdrpp/build/source_modules/rtl_sdr_source/rtl_sdr_source.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
+	cp sdrpp/build/decoder_modules/radio/radio.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
+	cp sdrpp/root/*.json debian/gsmgr/opt/hai/gsmgr/sdrpp
+
+	dh_gencontrol
+	dh_builddeb
+	
