@@ -35,6 +35,7 @@ sdrpp:
 	
 debian-package:
 	@echo "Making debian package..."
+	dpkg-buildpackage -b
 
 clean:
 	@echo "Make clean"
