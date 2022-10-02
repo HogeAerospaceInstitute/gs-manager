@@ -182,8 +182,9 @@ GsmResult_e GroundStationMgr::onStart()
 
 	spdlog::info("GroundStationMgr::onStart: reading cached tasks...");
 
-	std::ifstream ifs("/var/opt/hai/gsm/tasks.dat");
+	std::ifstream ifs(GSM_TASKS_CACHE_DB_FILE);
 
+	// Parse the tasks cache file if it exists
 	try
 	{
 		tasks = json::parse(ifs);
@@ -191,7 +192,10 @@ GsmResult_e GroundStationMgr::onStart()
 	catch (json::parse_error& ex)
 	{
 		spdlog::warn("GroundStationMgr::onStart: failed to parse cached file!");
-		return GSM_FAILURE;
+	}
+	catch (std::filesystem::filesystem_error const& ex)
+	{
+		spdlog::warn("GroundStationMgr::onStart: file system error!");
 	}
 
 	for (const auto& item : tasks.items())
@@ -1066,7 +1070,7 @@ GsmResult_e GroundStationMgr::writeTasksToFile(json& _tasks)
 {
 	spdlog::info("GroundStationMgr::writeTasksToFile: entered...");
 
-	std::ofstream file("/var/opt/hai/gsm/tasks.dat");
+	std::ofstream file(GSM_TASKS_CACHE_DB_FILE);
 	file << _tasks;
 	file.flush();
 
@@ -1079,7 +1083,7 @@ GsmResult_e GroundStationMgr::writeTLEToPredictDb(const std::string& _tle)
 	spdlog::info("GroundStationMgr::writeTLEToPredictDb: entered...");
 
 	// TODO: make file location configurable
-	std::ofstream file("/var/opt/hai/gsm/.predict/predict.tle");
+	std::ofstream file("/var/opt/hai/gsmgr/.predict/predict.tle");
 	file << _tle;
 	file.flush();
 
@@ -1133,7 +1137,14 @@ GsmResult_e GroundStationMgr::addSatellite(const string& _tle)
 
 GsmResult_e GroundStationMgr::processRecordings()
 {
-    const std::filesystem::path recordings{"/var/opt/hai/gsm/recordings"};
+    const std::filesystem::path recordings{GSM_RECORDING_DATA_DIR};
+    std::filesystem::directory_entry directory(recordings);
+
+    if (directory.is_directory() == false)
+    {
+		spdlog::info("GroundStationMgr::processRecordings: unable to access recording directory!");
+		return GSM_FAILURE;
+    }
 
     // directory_iterator can be iterated using a range-for loop
     for (auto const& dir_entry : std::filesystem::directory_iterator{recordings})

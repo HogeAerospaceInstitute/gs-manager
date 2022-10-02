@@ -511,7 +511,7 @@ private:
         ImGui::Text("Recordings");
         ImGui::Separator();
 
-        const std::filesystem::path recordings{"/var/opt/hai/gsm/recordings"};
+        const std::filesystem::path recordings{GSM_RECORDING_DATA_DIR};
         int numFiles = 0;
         for (auto const& dir_entry : std::filesystem::directory_iterator{recordings})
         {
@@ -551,7 +551,7 @@ MOD_EXPORT void _INIT_() {
     def["auto-refresh-tasks"] = true;
     def["auto-upload-recordings"] = false;
 
-    gConfig.setPath("/var/opt/hai/gsm/gsm_config.json");
+    gConfig.setPath("/var/opt/hai/gsmgr/gsm_config.json");
     gConfig.load(def);
     gConfig.enableAutoSave();
 }

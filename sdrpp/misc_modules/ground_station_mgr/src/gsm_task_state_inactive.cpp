@@ -78,7 +78,7 @@ GsmResult_e GsmTaskStateInactive::writeTLEToPredictDb(const std::string& _tle) c
 	spdlog::info("GroundStationMgr::writeTLEToPredictDb: entered...");
 
 	// TODO: make file location configurable
-	std::ofstream file("/var/opt/hai/gsm/.predict/predict.tle");
+	std::ofstream file("/var/opt/hai/gsmgr/.predict/predict.tle");
 	file << _tle;
 	file.flush();
 

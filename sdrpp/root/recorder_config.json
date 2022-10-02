@@ -2,6 +2,6 @@
     "Recorder": {
         "audioStream": "Radio",
         "mode": 0,
-        "recPath": "/var/opt/hai/gsmgr"
+        "recPath": "/var/opt/hai/gsmgr/recordings"
     }
 }

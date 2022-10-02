@@ -22,6 +22,10 @@
 #define _GSM_GLOBALS_H_
 
 
+#define GSM_RUNTIME_DATA_ROOT_DIR	"/var/opt/hai/gsmgr"
+#define GSM_RECORDING_DATA_DIR		"/var/opt/hai/gsmgr/recordings"
+#define GSM_TASKS_CACHE_DB_FILE		"/var/opt/hai/gsmgr/tasks.dat"
+
 typedef enum GsmResult
 {
 	GSM_SUCCESS = 0,
@@ -35,7 +39,6 @@ typedef enum GsmFSMResult
 	GSM_FSM_SUCCESS = 0,
 	GSM_FSM_FAILURE
 } GsmFSMResult_e;
-
 
 
 /* Message Categories */
