@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e 
+echo "prerm: cleaning directory for run-time data"
+rm -rf /var/opt/hai/gsmgr
+rmdir /var/opt/hai
+
+exit 0

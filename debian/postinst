@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e 
+echo "postinst: creating directory for runtime data"
+mkdir -p /var/opt/hai/gsmgr
+mkdir -p /var/opt/hai/gsmgr/recordings
+chmod 777 /var/opt/hai/gsmgr
+chmod 777 /var/opt/hai/gsmgr/recordings
+
+exit 0

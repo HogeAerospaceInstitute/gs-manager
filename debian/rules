@@ -33,8 +33,7 @@ binary:
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/icons
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/themes
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
-	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/recordings
-	
+
 	cp -r sdrpp/root/res/bandplans debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/colormaps debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/fonts debian/gsmgr/opt/hai/gsmgr/sdrpp/res
@@ -52,6 +51,10 @@ binary:
 	cp sdrpp/build/decoder_modules/radio/radio.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
 	cp sdrpp/root/*.json debian/gsmgr/opt/hai/gsmgr/sdrpp
 
+	# copy postinst/prerm scripts
+	cp debian/postinst debian/gsmgr/DEBIAN
+	cp debian/prerm debian/gsmgr/DEBIAN
+
+	dh_fixperms
 	dh_gencontrol
 	dh_builddeb
-	
