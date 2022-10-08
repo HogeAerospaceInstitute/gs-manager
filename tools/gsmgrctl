@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# Description: script to control gsmgr software
+
+
+# Globals
+SCRIPTNAME=gsmgrctl
+INSTALL_DIR=/opt/hai/gsmgr
+RUNTIME_DIR=/var/opt/hai/gsmgr
+
+
+usage () {
+	echo "Usage: $SCRIPTNAME { start | stop | restart | status }"
+}
+
+sdrpp_start() {
+	echo "Starting sdrpp..."
+
+	if pgrep -x "sdrpp" >/dev/null
+	then
+		echo "sdrpp is already running..."
+	else
+		sdrpp -r $INSTALL_DIR/sdrpp &
+	fi
+
+	# todo: check is sdrpp was started successfully
+}
+
+sdrpp_stop() {
+	echo "Stopping sdrpp..."
+	killall -9 sdrpp
+}
+
+sdrpp_status() {
+	if pgrep -x "sdrpp" >/dev/null
+	then
+    	echo "sdrpp is running"
+	else
+    	echo "sdrpp is stopped"
+	fi
+}
+
+predict_start() {
+	echo "Starting predict..."
+
+	if pgrep -x "predict" >/dev/null
+	then
+		echo "predict is already running..."
+	else
+		predict -s -n 10099 -t $RUNTIME_DIR/predict.tle &> /dev/null &
+	fi
+
+	# todo: check if predict was started successfully
+}
+
+predict_stop() {
+	echo "Stopping predict..."
+	killall -9 predict
+}
+
+predict_status() {
+	if pgrep -x "predict" >/dev/null
+	then
+    	echo "predict is running"
+	else
+    	echo "predict is stopped"
+	fi
+}
+
+rotctld_start() {
+	echo "Starting rotctld..."
+
+	if pgrep -x "rotctld" >/dev/null
+	then
+		echo "rotctld is already running..."
+	else
+		rotctld --verbose --port=4533 --rot-file=/dev/ttyACM0 &> /dev/null &
+	fi
+
+	# todo: check if rotctld was started successfully
+}
+
+rotctld_stop() {
+	echo "Stopping rotctld..."
+	killall -9 rotctld
+}
+
+rotctld_status() {
+	if pgrep -x "rotctld" >/dev/null
+	then
+    	echo "rotctld is running"
+	else
+    	echo "rotctld is stopped"
+	fi
+}
+
+# Environment variables
+export PATH=$PATH:/opt/hai/gsmgr/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/:/opt/hai/gsmgr/lib
+
+case "$1" in
+	start)
+		sdrpp_start
+		predict_start
+		rotctld_start
+	;;
+	stop)
+		sdrpp_stop
+		predict_stop
+		rotctld_stop
+	;;
+	restart)
+  		sdrpp_stop
+		predict_stop
+		rotctld_stop
+  		sleep 5
+		sdrpp_start
+		predict_start
+		rotctld_start
+    ;;
+	status)
+		sdrpp_status
+		predict_status
+		rotctld_status
+    ;;
+  
+	*)
+ 		usage  
+	;;
+
+esac
+
+exit 0
+
