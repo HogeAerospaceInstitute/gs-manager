@@ -8,6 +8,6 @@ Standards-Version: 4.1.4
 Package: gsmgr
 Architecture: amd64
 Multi-Arch: foreign
-Depends: ${misc:Depends}, libfftw3-dev, libglfw3-dev, libglew-dev, libvolk2-dev
+Depends: ${misc:Depends}, libfftw3-dev, libglfw3-dev, libglew-dev, libvolk2-dev | libvolk1-dev
 Description: Hoge Aerospace Institute Ground Station Manager software
  This Debian binary package is for the Hoge Aerospace Institute Ground Station Manager software.

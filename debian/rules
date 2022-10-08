@@ -26,6 +26,8 @@ binary:
 	mkdir -p debian/gsmgr/opt/hai/gsmgr
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/bin
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/lib
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/tools
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/bandplans
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/colormaps
@@ -33,13 +35,14 @@ binary:
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/icons
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/res/themes
 	mkdir -p debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
+	mkdir -p debian/gsmgr/opt/hai/gsmgr/predict
 
 	cp -r sdrpp/root/res/bandplans debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/colormaps debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/fonts debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/icons debian/gsmgr/opt/hai/gsmgr/sdrpp/res
 	cp -r sdrpp/root/res/themes debian/gsmgr/opt/hai/gsmgr/sdrpp/res
-	
+
 	cp hamlib/tests/.libs/rotctld debian/gsmgr/opt/hai/gsmgr/bin
 	cp hamlib/src/.libs/libhamlib.so.4 debian/gsmgr/opt/hai/gsmgr/lib
 	cp predict/predict debian/gsmgr/opt/hai/gsmgr/bin
@@ -50,6 +53,8 @@ binary:
 	cp sdrpp/build/source_modules/rtl_sdr_source/rtl_sdr_source.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
 	cp sdrpp/build/decoder_modules/radio/radio.so debian/gsmgr/opt/hai/gsmgr/sdrpp/modules
 	cp sdrpp/root/*.json debian/gsmgr/opt/hai/gsmgr/sdrpp
+	cp predict/default/* debian/gsmgr/opt/hai/gsmgr/predict
+	cp tools/gsmgrctl debian/gsmgr/opt/hai/gsmgr/tools
 
 	# copy postinst/prerm scripts
 	cp debian/postinst debian/gsmgr/DEBIAN

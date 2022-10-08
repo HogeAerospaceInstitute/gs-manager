@@ -4,7 +4,7 @@ project(ground_station_mgr)
 file(GLOB SRC "src/*.cpp" "gsm_task.h")
 
 add_library(ground_station_mgr SHARED ${SRC})
-target_link_libraries(ground_station_mgr PRIVATE sdrpp_core /usr/local/lib/libcurl.a /usr/local/lib64/libssl.a /usr/local/lib64/libcrypto.a)
+target_link_libraries(ground_station_mgr PRIVATE sdrpp_core curl ssl crypto)
 set_target_properties(ground_station_mgr PROPERTIES PREFIX "")
 
 target_include_directories(ground_station_mgr PRIVATE "src/")
