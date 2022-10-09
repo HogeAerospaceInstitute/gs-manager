@@ -261,6 +261,7 @@ size_t GsmHttpClient::writeRspData(void* contents, size_t size, size_t nmemb, vo
 
 GsmResult_e GsmHttpClient::handleUploadFileReq(GsmMsgHttpReq* _msg)
 {
+    int responseCode;
 	CURLcode res;
 	std::string file;
 	std::string url;
@@ -309,6 +310,7 @@ GsmResult_e GsmHttpClient::handleUploadFileReq(GsmMsgHttpReq* _msg)
 	{
 	     fprintf(stderr, "curl_easy_perform() failed: %s\n",
 	              curl_easy_strerror(res));
+	     responseCode = -1;
 	}
 	else
 	{
@@ -322,13 +324,22 @@ GsmResult_e GsmHttpClient::handleUploadFileReq(GsmMsgHttpReq* _msg)
 	              (unsigned long)(total_time / 1000000),
 	              (unsigned long)(total_time % 1000000));
 #endif
+	     curl_easy_getinfo(mCurl, CURLINFO_RESPONSE_CODE, &responseCode);
 	}
 
 	/* always cleanup */
 	curl_easy_cleanup(mCurl);
 	fclose(fd);
 
-	// TODO send response back
+ 	// respond back to GsmMgr thread
+	GsmMsgHttpRsp* pMsg = new GsmMsgHttpRsp();
+	pMsg->setDestination("GSMGR");
+	pMsg->setType(GSM_MSG_TYPE_UPLOAD_FILE_RSP);
+	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setFile(file);
+	pMsg->setResultCode(responseCode);
+
+	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
 	return GSM_SUCCESS;
 }

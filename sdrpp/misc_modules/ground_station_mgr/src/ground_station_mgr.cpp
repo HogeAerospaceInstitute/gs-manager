@@ -175,6 +175,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = processRecordings();
 			break;
 		}
+		case GSM_MSG_TYPE_UPLOAD_FILE_RSP:
+		{
+			result = handleUploadFileRsp(dynamic_cast<GsmMsgHttpRsp*>(_msg));
+			break;
+		}
 		default:
 		{
 			spdlog::error("GroundStationMgr::onMessage: unknown msg, type={0}!!",
@@ -1279,4 +1284,28 @@ GsmResult_e GroundStationMgr::processRecordings()
 
 	return GSM_SUCCESS;
 }
+
+GsmResult_e GroundStationMgr::handleUploadFileRsp(GsmMsgHttpRsp* _msg)
+{
+	std::string oldFilename;
+	std::string filename;
+	int responseCode = 0;
+
+	_msg->getFile(oldFilename);
+	responseCode = _msg->getResultCode();
+
+	spdlog::info("GroundStationMgr::processRecordings: file={0}, rspCode={1}",
+			oldFilename.c_str(), responseCode);
+
+	// TODO: check response code and only move if successful, 2xx
+
+	std::filesystem::path oldFile = oldFilename;
+	filename = oldFile.filename();
+	std::filesystem::path newFile = "/var/opt/hai/gsmgr/recordings/transferred/" + filename;
+
+    std::filesystem::rename(oldFile, newFile);
+
+	return GSM_SUCCESS;
+}
+
 

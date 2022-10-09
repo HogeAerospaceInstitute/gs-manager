@@ -620,4 +620,55 @@ private:
 };
 
 
+class GsmMsgHttpRsp : public GsmMsg
+{
+public:
+
+	GsmMsgHttpRsp()
+	{
+		mResultCode = 0;
+	}
+
+	virtual ~GsmMsgHttpRsp() {}
+
+	void setURL(const std::string& _url)
+	{
+		mURL = _url;
+	}
+
+	void getURL(std::string& _url) const
+	{
+		_url = mURL;
+	}
+
+	void setFile(const std::string& _file)
+	{
+		mFile = _file;
+	}
+
+	void getFile(std::string& _file) const
+	{
+		_file = mFile;
+	}
+
+	void setResultCode(int _resultCode)
+	{
+		mResultCode = _resultCode;
+	}
+
+	int getResultCode() const
+	{
+		return mResultCode;
+	}
+
+
+
+private:
+
+	std::string mURL;
+	std::string mFile;
+	int mResultCode;
+
+};
+
 #endif

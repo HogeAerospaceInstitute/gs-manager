@@ -76,6 +76,8 @@ typedef enum GsmFSMResult
 
 /* HTTP Client Messages */
 #define GSM_MSG_TYPE_UPLOAD_FILE_REQ				GSM_MSG_CAT_HTTPCLIENT+0x0001
+#define GSM_MSG_TYPE_UPLOAD_FILE_RSP				GSM_MSG_CAT_HTTPCLIENT+0x0002
+
 
 /* Rotator Controller Messages */
 #define GSM_MSG_TYPE_RELOAD_PREDICT_DB_REQ		GSM_MSG_CAT_ROTCTRL+0x0001

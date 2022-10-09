@@ -117,6 +117,7 @@ class GroundStationMgr : public GsmCommConsumer
 
 
 		GsmResult_e handleReloadPredictDbRsp(GsmMsgReloadPredictDbRsp* _msg);
+		GsmResult_e handleUploadFileRsp(GsmMsgHttpRsp* _msg);
 
 		GsmResult_e sendCommand(const std::string& _cmd,
 								std::string& _rsp);
