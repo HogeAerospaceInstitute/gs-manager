@@ -74,7 +74,7 @@ rotctld_start() {
 	then
 		echo "rotctld is already running..."
 	else
-		rotctld --verbose --port=4533 --rot-file=/dev/ttyACM0 &> /dev/null &
+		rotctld --verbose --port=4533 -m 202 --rot-file=/dev/ttyACM0 &> /dev/null &
 	fi
 
 	# todo: check if rotctld was started successfully
