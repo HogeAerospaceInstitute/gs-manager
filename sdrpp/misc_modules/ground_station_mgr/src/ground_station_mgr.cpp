@@ -110,6 +110,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 			result = handleTrackSatelliteRsp(dynamic_cast<GsmMsgTrackSatelliteRsp*>(_msg));
 			break;
 		}
+		case GSM_MSG_TYPE_TRACK_SATELLITE_TIMEOUT:
+		{
+			result = handleTrackSatelliteTimeout(dynamic_cast<GsmMsgTimeout*>(_msg));
+			break;
+		}
 		case GSM_MSG_TYPE_GET_SATELLITE_POS_REQ:
 		{
 			result = handleGetSatellitePosReq(dynamic_cast<GsmMsgGetSatellitePosReq*>(_msg));
@@ -128,6 +133,11 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 		case GSM_MSG_TYPE_MOVE_ROTATOR_RSP:
 		{
 			result = handleMoveRotatorRsp(dynamic_cast<GsmMsgMoveRotatorRsp*>(_msg));
+			break;
+		}
+		case GSM_MSG_TYPE_MOVE_ROTATOR_TIMEOUT:
+		{
+			result = handleMoveRotatorTimeout(dynamic_cast<GsmMsgTimeout*>(_msg));
 			break;
 		}
 		case GSM_MSG_TYPE_RELOAD_PREDICT_DB_RSP:
@@ -167,7 +177,8 @@ GsmResult_e GroundStationMgr::onMessage(GsmMsg* _msg)
 		}
 		default:
 		{
-			spdlog::error("GroundStationMgr::onMessage: unknown msg!!");
+			spdlog::error("GroundStationMgr::onMessage: unknown msg, type={0}!!",
+					_msg->getType());
 			break;
 		}
 	}
@@ -574,6 +585,55 @@ GsmResult_e GroundStationMgr::handleTrackSatelliteRsp(GsmMsgTrackSatelliteRsp* _
 	return GSM_SUCCESS;
 }
 
+GsmResult_e GroundStationMgr::handleTrackSatelliteTimeout(GsmMsgTimeout* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+
+	_msg->getAppId(taskId);
+
+	spdlog::info("GroundStationMgr::handleTrackSatelliteTimeout: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleTrackSatelliteTimeout: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
+
 
 GsmResult_e GroundStationMgr::handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg)
 {
@@ -845,6 +905,55 @@ GsmResult_e GroundStationMgr::handleMoveRotatorRsp(GsmMsgMoveRotatorRsp* _msg)
 	return GSM_SUCCESS;
 }
 
+
+GsmResult_e GroundStationMgr::handleMoveRotatorTimeout(GsmMsgTimeout* _msg)
+{
+	GsmTask* pTask = NULL;
+	std::string taskId;
+
+	_msg->getAppId(taskId);
+
+	spdlog::info("GroundStationMgr::handleMoveRotatorTimeout: task={0}",
+			taskId.c_str());
+
+	if (_msg == NULL)
+	{
+		spdlog::error("GroundStationMgr::handleMoveRotatorTimeout: invalid msg!!");
+		return GSM_FAILURE;
+	}
+
+	// TODO: optimize
+	bool bFound = false;
+	std::map<string,GsmTask*>::iterator it;
+	for (it = mTasks.begin(); it != mTasks.end(); ++it) {
+		pTask = it->second;
+
+		if (pTask == NULL)
+		{
+			continue;
+		}
+
+		// TODO: get id from message
+		std::string taskUUID;
+		pTask->getUuid(taskUUID);
+		int compare = taskUUID.compare(taskId);
+		if (compare == 0)
+		{
+			bFound = true;
+			break;
+		}
+	}
+
+	if (bFound == true)
+	{
+		// Send event to state machine
+		GsmEvent* pEvent = new GsmEvent();
+		pEvent->init(*_msg);
+		pTask->onEvent(*pEvent);
+	}
+
+	return GSM_SUCCESS;
+}
 
 
 GsmResult_e GroundStationMgr::handleGetRotatorPosRsp(GsmMsgGetRotatorPosRsp* _msg)

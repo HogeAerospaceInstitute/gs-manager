@@ -65,6 +65,44 @@ GsmTaskStateWfRotatorAligned::onMoveRotatorRsp(GsmTask& _task,
  *	Notes:
  *********************************************************************/
 GsmFSMResult_e
+GsmTaskStateWfRotatorAligned::onMoveRotatorTimeout(GsmTask& _task,
+								 GsmTask::GsmTaskFSM_t& _fsm,
+								 const GsmEvent& _event) const
+{
+	std::string taskId;
+	std::string azimuth;
+	std::string elevation;
+
+	spdlog::info("GsmTaskStateWfRotatorAligned::onMoveRotatorTimeout: entered");
+
+	_task.getMoveRotatorRspTimer().onTimeout();
+	_task.getUuid(taskId);
+
+    // send message to move rotator again
+    GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
+	pMsg->setDestination("ROTCTRL");
+	pMsg->setType(GSM_MSG_TYPE_MOVE_ROTATOR_REQ);
+	pMsg->setCategory(GsmMsg::GSM_MSG_CAT_APP);
+	pMsg->setTaskId(taskId);
+	pMsg->setAzimuth(azimuth);
+	pMsg->setElevation(elevation);
+
+	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
+
+	_task.getMoveRotatorRspTimer().start(10000, GsmTimer::ONCE);
+
+	return GSM_FSM_SUCCESS;
+}
+
+
+/*********************************************************************
+ *	Name:	onGetPosRsp
+ *	Description:
+ *	Parameters: NA
+ *	Returns:	NA
+ *	Notes:
+ *********************************************************************/
+GsmFSMResult_e
 GsmTaskStateWfRotatorAligned::onCheckRotatorDelayTimeout(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const

@@ -86,6 +86,11 @@ GsmTaskStateBase::onEvent(GsmTask& _task,
 			result = onMoveRotatorRsp(_task, _fsm, *gsmEvent);
 			break;
 		}
+		case GSM_FSM_EVENT_ID_MOVE_ROTATOR_TIMEOUT:
+		{
+			result = onMoveRotatorTimeout(_task, _fsm, *gsmEvent);
+			break;
+		}
 		case GSM_FSM_EVENT_ID_GET_ROTATOR_POS_RSP:
 		{
 			result = onGetRotatorPosRsp(_task, _fsm, *gsmEvent);
@@ -194,6 +199,16 @@ GsmTaskStateBase::onMoveRotatorRsp( GsmTask& _task,
 								   const GsmEvent& _event ) const
 {
 	spdlog::error("GsmTaskStateBase::onMoveRotatorRsp: event not handled!!");
+	return invalidEvent( _event );
+}
+
+
+GsmFSMResult_e
+GsmTaskStateBase::onMoveRotatorTimeout( GsmTask& _task,
+							  	  GsmTask::GsmTaskFSM_t& _fsm,
+								   const GsmEvent& _event ) const
+{
+	spdlog::error("GsmTaskStateBase::onMoveRotatorTimeout: event not handled!!");
 	return invalidEvent( _event );
 }
 

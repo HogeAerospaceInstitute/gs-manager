@@ -109,6 +109,10 @@ class GsmTaskStateBase : public BaseState<GsmTask>
 										     GsmTask::GsmTaskFSM_t& _fsm,
 									         const GsmEvent& _event ) const;
 
+		virtual GsmFSMResult_e onMoveRotatorTimeout(GsmTask& _task,
+										     GsmTask::GsmTaskFSM_t& _fsm,
+									         const GsmEvent& _event ) const;
+
 		virtual GsmFSMResult_e onGetRotatorPosRsp(GsmTask& _task,
 										     GsmTask::GsmTaskFSM_t& _fsm,
 									         const GsmEvent& _event ) const;

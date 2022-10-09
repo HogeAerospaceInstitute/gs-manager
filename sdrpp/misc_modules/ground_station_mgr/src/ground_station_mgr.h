@@ -101,11 +101,14 @@ class GroundStationMgr : public GsmCommConsumer
 
 		GsmResult_e handleTrackSatelliteReq(GsmMsgTrackSatelliteReq* _msg);
 		GsmResult_e handleTrackSatelliteRsp(GsmMsgTrackSatelliteRsp* _msg);
+		GsmResult_e handleTrackSatelliteTimeout(GsmMsgTimeout* _msg);
+
 		GsmResult_e handleGetSatellitePosReq(GsmMsgGetSatellitePosReq* _msg);
 		GsmResult_e handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp* _msg);
 
 		GsmResult_e handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg);
 		GsmResult_e handleMoveRotatorRsp(GsmMsgMoveRotatorRsp* _msg);
+		GsmResult_e handleMoveRotatorTimeout(GsmMsgTimeout* _msg);
 		GsmResult_e handleGetRotatorPosRsp(GsmMsgGetRotatorPosRsp* _msg);
 		GsmResult_e handleCheckRotatorDelayTimeout(GsmMsgTimeout* _msg);
 		GsmResult_e handleRecordingDelayTimeout(GsmMsgTimeout* _msg);

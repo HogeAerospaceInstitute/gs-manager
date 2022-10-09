@@ -239,6 +239,8 @@ GsmResult_e GsmRotatorController::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _ms
 
     // TODO: fill in success/failure in response
 
+    spdlog::info("GsmRotatorController::handleMoveRotatorReq: sending response");
+
     // send response
 	GsmMsgMoveRotatorRsp* pMsg = new GsmMsgMoveRotatorRsp();
 
@@ -417,13 +419,19 @@ GsmResult_e GsmRotatorController::sendCommandToRotctld(const std::string& _cmd,
 		return GSM_FAILURE;
 	}
 
+	// Set read timeout
+	struct timeval timeout;
+	timeout.tv_sec = 5;
+	timeout.tv_usec = 0;
+	setsockopt(socketFd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
 	if (connect(socketFd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) != 0)
 	{
 		spdlog::error("GsmRotatorController::sendCommand: can't connect to server");
 		return GSM_FAILURE;
 	}
 
-   //  int numsent = send(sock, _command, strlen(_command), 0);
+    //  int numsent = send(sock, _command, strlen(_command), 0);
 	int numsent = write(socketFd, _cmd.c_str(), strlen(_cmd.c_str()));
     spdlog::info("GsmRotatorController::sendCommandToRotctld: bytes-sent={0}, code={1}",
     		numsent, strerror(errno));
