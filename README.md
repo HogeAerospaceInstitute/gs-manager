@@ -2,6 +2,8 @@
 
 Refer to the README.md file under the following directory - sdrpp/misc_modules/ground_station_mgr for software design details.
 
+# Requirements for Debian based linux
+	$> sudo apt install libfftw3-dev libglfw3-dev libvolk2-dev libsoapysdr-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev autoconf automake libtool libglew-dev ncurses-dev libairspy-dev libcurl4-openssl-dev libssl-dev debhelper
 
 # Compile Software
 From the main directory, run make:
