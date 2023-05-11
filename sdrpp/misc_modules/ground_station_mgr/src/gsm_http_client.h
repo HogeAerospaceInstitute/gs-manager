@@ -30,7 +30,7 @@
 #define _GSM_HTTP_CLIENT_H_
 
 #include <string>
-#include <curl.h>
+#include <curl/curl.h>
 
 #include "gsm_globals.h"
 #include "gsm_msg.h"

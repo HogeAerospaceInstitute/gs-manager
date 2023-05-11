@@ -23,7 +23,7 @@
 #include <gui/gui.h>
 #include <gui/style.h>
 #include <config.h>
-#include <curl.h>
+#include <curl/curl.h>
 #include <thread>
 #include <filesystem>
 
