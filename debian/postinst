@@ -2,14 +2,23 @@
 
 set -e 
 echo "postinst: creating directory for runtime data"
+if [ ! -d "/var/opt" ]
+then
+  mkdir -p /var/opt
+fi
+
+mkdir -p /var/opt/hai
 mkdir -p /var/opt/hai/gsmgr
 mkdir -p /var/opt/hai/gsmgr/recordings
 mkdir -p /var/opt/hai/gsmgr/recordings/transferred
+chmod 777 /var/opt/hai
 chmod 777 /var/opt/hai/gsmgr
 chmod 777 /var/opt/hai/gsmgr/recordings
 chmod 777 /var/opt/hai/gsmgr/recordings/transferred
 
 # copy default predict data files
 cp /opt/hai/gsmgr/predict/* /var/opt/hai/gsmgr
+chmod 666 /var/opt/hai/gsmgr/predict.*
 
 exit 0
+
