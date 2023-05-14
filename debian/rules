@@ -56,10 +56,11 @@ binary:
 	cp predict/default/* debian/gsmgr/opt/hai/gsmgr/predict
 	cp tools/gsmgrctl debian/gsmgr/opt/hai/gsmgr/tools
 
+	dh_fixperms
+	dh_gencontrol
+
 	# copy postinst/prerm scripts
 	cp debian/postinst debian/gsmgr/DEBIAN
 	cp debian/prerm debian/gsmgr/DEBIAN
 
-	dh_fixperms
-	dh_gencontrol
 	dh_builddeb
