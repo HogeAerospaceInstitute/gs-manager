@@ -108,6 +108,18 @@ class GsmTask
 			_elevation = mElevation;
 		}
 
+		void setAlertMsg(const std::string& _alertMsg )
+		{
+			mAlertMsg = _alertMsg;
+		}
+
+		void getAlertMsg(std::string& _alertMsg)
+		{
+			_alertMsg = mAlertMsg;
+		}
+
+
+
 
 	public:
 
@@ -133,6 +145,7 @@ class GsmTask
 		double mFrequency;
 
 		std::string mStatus;
+		std::string mAlertMsg;
 
 		GsmTaskFSM_t mTaskFSM;
 

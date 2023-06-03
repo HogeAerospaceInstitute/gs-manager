@@ -368,6 +368,13 @@ GsmResult_e GsmRotatorController::sendCommand(const std::string& _cmd,
 		return GSM_FAILURE;
     }
 
+    // validate response
+    if ((strlen(rspBuf) == 0) || (strlen(rspBuf) > 1024))
+    {
+        spdlog::error("GsmRotatorController::sendCommand: bad rsp received!!");
+    	return GSM_FAILURE;
+    }
+
     spdlog::info("GsmRotatorController::sendCommand: rsp={0}, result={1}",
     			  rspBuf, strerror(errno));
 

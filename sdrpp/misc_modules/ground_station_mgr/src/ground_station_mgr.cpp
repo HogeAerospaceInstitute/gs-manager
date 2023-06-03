@@ -384,6 +384,7 @@ GsmResult_e GroundStationMgr::handleRefreshTasksRsp(GsmMsg* _msg)
 	    if (lines.size() != 3)
 	    {
 	       	spdlog::warn("GroundStationMgr::handleRefreshTasksRsp: tle does not have title!");
+	       	pTask->setAlertMsg("Unsupported TLE!");
 	    }
 	    else
 	    {
