@@ -420,15 +420,15 @@ private:
                 std::string status = "   State=" + taskStatus;
                 ImGui::Text(status.c_str());
 
-                ImGui::SameLine();
-
                 std::string alertMsg;
                 pTask->getAlertMsg(alertMsg);
                 if (!alertMsg.empty())
                 {
+                    ImGui::SameLine();
+
                 	std::string alert = "   Alert=" + alertMsg;
                 	ImGui::Text(alert.c_str());
-                	ImGui::Separator();
+//                	ImGui::Separator();
                 }
 
                 ImGui::Separator();

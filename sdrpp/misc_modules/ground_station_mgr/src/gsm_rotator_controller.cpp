@@ -154,11 +154,27 @@ GsmResult_e GsmRotatorController::handleGetSatellitePosReq(GsmMsgGetSatellitePos
 		return GSM_FAILURE;
 	}
 
+	// verify response
+	if (rsp.empty())
+	{
+		spdlog::error("GsmRotatorController::handleGetSatellitePosReq: empty response!!");
+		// TODO: send failure rsp message
+		return GSM_FAILURE;
+	}
+
     // parse the response
     std::stringstream responseSS(rsp);
     std::istream_iterator<std::string> begin(responseSS);
     std::istream_iterator<std::string> end;
     std::vector<std::string> tokens(begin, end);
+
+    // verify string contents
+    if (tokens.size() < 5)
+    {
+		spdlog::error("GsmRotatorController::handleGetSatellitePosReq: invalid string!!");
+		// TODO: send failure rsp message
+		return GSM_FAILURE;
+    }
 
     std::string az = tokens[5];
     std::string el = tokens[4];
@@ -267,8 +283,16 @@ GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq*
 			taskId.c_str());
 
     // Send get position command to rotctld
-    std::string rotcommand = "get_pos";
+    std::string rotcommand = "p";
     result = sendCommandToRotctld(rotcommand, rsp);
+
+	// verify response
+	if (rsp.empty())
+	{
+		spdlog::error("GsmRotatorController::handleGetRotatorPosReq: empty response!!");
+		// TODO: send failure rsp message
+		return GSM_FAILURE;
+	}
 
     // send response
 	GsmMsgGetRotatorPosRsp* pMsg = new GsmMsgGetRotatorPosRsp();
@@ -285,6 +309,21 @@ GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq*
 		std::istream_iterator<std::string> begin(responseSS);
 		std::istream_iterator<std::string> end;
 		std::vector<std::string> tokens(begin, end);
+
+	    // verify string contents
+	    if (tokens.size() < 2)
+	    {
+			spdlog::error("GsmRotatorController::handleGetSatellitePosReq: invalid string!!");
+			// TODO: send failure rsp message
+			return GSM_FAILURE;
+	    }
+
+	    if ((tokens[0] == "RPRT"))
+	    {
+			spdlog::error("GsmRotatorController::handleGetSatellitePosReq: error rsp!!");
+			// TODO: send failure rsp message
+			return GSM_FAILURE;
+	    }
 
 		std::string az = tokens[0];
 		std::string el = tokens[1];
@@ -368,13 +407,6 @@ GsmResult_e GsmRotatorController::sendCommand(const std::string& _cmd,
 		return GSM_FAILURE;
     }
 
-    // validate response
-    if ((strlen(rspBuf) == 0) || (strlen(rspBuf) > 1024))
-    {
-        spdlog::error("GsmRotatorController::sendCommand: bad rsp received!!");
-    	return GSM_FAILURE;
-    }
-
     spdlog::info("GsmRotatorController::sendCommand: rsp={0}, result={1}",
     			  rspBuf, strerror(errno));
 
@@ -455,6 +487,8 @@ GsmResult_e GsmRotatorController::sendCommandToRotctld(const std::string& _cmd,
 
     spdlog::info("GsmRotatorController::sendCommandToRotctld: response={0}, code={1}",
     		buffer, strerror(errno));
+
+    _rsp = buffer;
 
     // closing the connected socket
     close(socketFd);
