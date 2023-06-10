@@ -36,8 +36,8 @@ class GsmSatellite {
 	public:
 
 		GsmSatellite() {
-			mAzimuth = "0";
-			mElevation = "0";
+			mAzimuth = 0.0;
+			mElevation = 0.0;
 		}
 
 		virtual ~GsmSatellite() {}
@@ -59,20 +59,20 @@ class GsmSatellite {
 			_tle = mTLE;
 		}
 
-		void setAzimuth(const std::string& _azimuth) {
+		void setAzimuth(double _azimuth) {
 			mAzimuth = _azimuth;
 		}
 
-		void getAzimuth(std::string& _azimuth) {
-			_azimuth = mAzimuth;
+		double getAzimuth() {
+			return mAzimuth;
 		}
 
-		void setElevation(const std::string& _elevation) {
+		void setElevation(double _elevation) {
 			mElevation = _elevation;
 		}
 
-		void getElevation(std::string& _elevation) {
-			_elevation = mElevation;
+		double getElevation() {
+			return mElevation;
 		}
 
 		void print(string& _out) {
@@ -87,8 +87,8 @@ class GsmSatellite {
 		std::string mName;
 		std::string mTLE;
 
-		std::string mAzimuth;
-		std::string mElevation;
+		double mAzimuth;
+		double mElevation;
 
 };
 

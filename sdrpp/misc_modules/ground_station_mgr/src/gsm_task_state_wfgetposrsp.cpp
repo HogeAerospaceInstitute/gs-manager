@@ -44,8 +44,8 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 								 const GsmEvent& _event) const
 {
 	std::string taskId;
-	std::string azimuth;
-	std::string elevation;
+	double azimuth;
+	double elevation;
 
 	_task.getGetSatellitePosRspTimer().stop();
 
@@ -53,11 +53,13 @@ GsmTaskStateWfGetPosRsp::onGetPosRsp(GsmTask& _task,
 
     // Get az/el from response message
     GsmMsgGetSatellitePosRsp* pRsp = (GsmMsgGetSatellitePosRsp*)_event.getMsg();
-    pRsp->getAzimuth(azimuth);
-    pRsp->getElevation(elevation);
+    elevation = pRsp->getElevation();
+
+    // convert azimuth to -180 to 180 range
+    azimuth = pRsp->getAzimuth() - 180;
 
 	spdlog::info("GsmTaskStateWfGetPosRsp::onGetPosRsp: azimuth={0}, elevation={1}",
-			azimuth.c_str(), elevation.c_str());
+			azimuth, elevation);
 
     // save the target az/el in the task
     _task.setAzimuth(azimuth);

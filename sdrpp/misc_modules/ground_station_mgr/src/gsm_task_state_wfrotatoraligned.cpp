@@ -70,13 +70,15 @@ GsmTaskStateWfRotatorAligned::onMoveRotatorTimeout(GsmTask& _task,
 								 const GsmEvent& _event) const
 {
 	std::string taskId;
-	std::string azimuth;
-	std::string elevation;
+	double azimuth;
+	double elevation;
 
 	spdlog::info("GsmTaskStateWfRotatorAligned::onMoveRotatorTimeout: entered");
 
 	_task.getMoveRotatorRspTimer().onTimeout();
 	_task.getUuid(taskId);
+	azimuth = _task.getAzimuth();
+	elevation = _task.getElevation();
 
     // send message to move rotator again
     GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
@@ -140,24 +142,24 @@ GsmTaskStateWfRotatorAligned::onGetRotatorPosRsp(GsmTask& _task,
 								 GsmTask::GsmTaskFSM_t& _fsm,
 								 const GsmEvent& _event) const
 {
-	std::string targetAzimuth;
-	std::string targetElevation;
-	std::string currentAzimuth;
-	std::string currentElevation;
+	double targetAzimuth;
+	double targetElevation;
+	double currentAzimuth;
+	double currentElevation;
 
 	GsmMsgGetRotatorPosRsp* pMsg = (GsmMsgGetRotatorPosRsp*)_event.getMsg();
 
 	_task.getGetRotatePosRspTimer().stop();
 
 	// check whether the position matches the expected position
-	_task.getAzimuth(targetAzimuth);
-	_task.getElevation(targetElevation);
+	targetAzimuth = _task.getAzimuth();
+	targetElevation = _task.getElevation();
 
-	pMsg->getAzimuth(currentAzimuth);
-	pMsg->getElevation(currentElevation);
+	currentAzimuth = pMsg->getAzimuth();
+	currentElevation = pMsg->getElevation();
 
 	spdlog::info("GsmTaskStateWfRotatorAligned::onGetRotatorPosRsp: azimuth={0}, elevation={1}",
-			currentAzimuth.c_str(), currentElevation.c_str());
+			currentAzimuth, currentElevation);
 
 	if ((currentAzimuth == targetAzimuth) &&
 		(currentElevation == targetElevation))

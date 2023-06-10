@@ -667,8 +667,8 @@ GsmResult_e GroundStationMgr::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
 {
 	GsmSatellite* pSatellite = NULL;
 	std::string satelliteName;
-	std::string azimuth;
-	std::string elevation;
+	double azimuth = 0.0;
+	double elevation = 0.0;
 
 	_msg->getSatellite(satelliteName);
 
@@ -695,8 +695,8 @@ GsmResult_e GroundStationMgr::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _msg)
 	if (bFound == true)
 	{
 		pSatellite->getName(satelliteName);
-		pSatellite->getAzimuth(azimuth);
-		pSatellite->getElevation(elevation);
+		azimuth = pSatellite->getAzimuth();
+		elevation = pSatellite->getElevation();
 	}
 
 	GsmMsgMoveRotatorReq* pMsg = new GsmMsgMoveRotatorReq();
@@ -755,8 +755,8 @@ GsmResult_e GroundStationMgr::handleGetSatellitePosRsp(GsmMsgGetSatellitePosRsp*
 
 	if (bFound == true)
 	{
-		pSatellite->setAzimuth(az);
-		pSatellite->setElevation(el);
+		pSatellite->setAzimuth(std::stod(az));
+		pSatellite->setElevation(std::stod(el));
 	}
 
 	// If taskId exists, then forward to state machine

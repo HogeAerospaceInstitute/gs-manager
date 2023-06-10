@@ -259,6 +259,8 @@ class GsmMsgGetSatellitePosRsp : public GsmMsg
 
 		GsmMsgGetSatellitePosRsp()
 		{
+			mElevation = 0.0;
+			mAzimuth = 0.0;
 			mResult = 0;
 		}
 
@@ -284,24 +286,24 @@ class GsmMsgGetSatellitePosRsp : public GsmMsg
 			_satellite = mSatellite;
 		}
 
-		void setAzimuth(const std::string& _azimuth)
+		void setAzimuth(double _azimuth)
 		{
 			mAzimuth = _azimuth;
 		}
 
-		void getAzimuth(std::string& _azimuth)
+		double getAzimuth()
 		{
-			_azimuth = mAzimuth;
+			return mAzimuth;
 		}
 
-		void setElevation(const std::string& _elevation)
+		void setElevation(double _elevation)
 		{
 			mElevation = _elevation;
 		}
 
-		void getElevation(std::string& _elevation)
+		double getElevation()
 		{
-			_elevation = mElevation;
+			return mElevation;
 		}
 
 
@@ -309,8 +311,8 @@ class GsmMsgGetSatellitePosRsp : public GsmMsg
 
 		std::string mTaskId;
 		std::string mSatellite;
-		std::string mAzimuth;
-		std::string mElevation;
+		double mAzimuth;
+		double mElevation;
 		int mResult;
 
 };
@@ -322,8 +324,8 @@ class GsmMsgMoveRotatorReq : public GsmMsg
 
 		GsmMsgMoveRotatorReq()
 		{
-			mElevation = "0.0";
-			mAzimuth = "0.0";
+			mElevation = 0.0;
+			mAzimuth = 0.0;
 		}
 
 		virtual ~GsmMsgMoveRotatorReq() {}
@@ -348,24 +350,24 @@ class GsmMsgMoveRotatorReq : public GsmMsg
 			_satellite = mSatellite;
 		}
 
-		void setAzimuth(const std::string& _azimuth)
+		void setAzimuth(double _azimuth)
 		{
 			mAzimuth = _azimuth;
 		}
 
-		void getAzimuth(std::string& _azimuth)
+		double getAzimuth()
 		{
-			_azimuth = mAzimuth;
+			return mAzimuth;
 		}
 
-		void setElevation(const std::string& _elevation)
+		void setElevation(double _elevation)
 		{
 			mElevation = _elevation;
 		}
 
-		void getElevation(std::string& _elevation)
+		double getElevation()
 		{
-			_elevation = mElevation;
+			return mElevation;
 		}
 
 
@@ -373,8 +375,8 @@ class GsmMsgMoveRotatorReq : public GsmMsg
 
 		std::string mTaskId;
 		std::string mSatellite;
-		std::string mAzimuth;
-		std::string mElevation;
+		double mAzimuth;
+		double mElevation;
 
 };
 
@@ -497,8 +499,8 @@ class GsmMsgGetRotatorPosRsp : public GsmMsg
 
 		GsmMsgGetRotatorPosRsp()
 		{
-			mElevation = "0.0";
-			mAzimuth = "0.0";
+			mElevation = 0.0;
+			mAzimuth = 0.0;
 		}
 
 		virtual ~GsmMsgGetRotatorPosRsp() {}
@@ -513,32 +515,32 @@ class GsmMsgGetRotatorPosRsp : public GsmMsg
 			_taskId = mTaskId;
 		}
 
-		void setAzimuth(const std::string& _azimuth)
+		void setAzimuth(double _azimuth)
 		{
 			mAzimuth = _azimuth;
 		}
 
-		void getAzimuth(std::string& _azimuth)
+		double getAzimuth()
 		{
-			_azimuth = mAzimuth;
+			return mAzimuth;
 		}
 
-		void setElevation(const std::string& _elevation)
+		void setElevation(double _elevation)
 		{
 			mElevation = _elevation;
 		}
 
-		void getElevation(std::string& _elevation)
+		double getElevation()
 		{
-			_elevation = mElevation;
+			return mElevation;
 		}
 
 
 	private:
 
 		std::string mTaskId;
-		std::string mAzimuth;
-		std::string mElevation;
+		double mAzimuth;
+		double mElevation;
 
 };
 

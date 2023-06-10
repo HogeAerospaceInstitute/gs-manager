@@ -492,10 +492,8 @@ private:
                 }
 
                 ImGui::SameLine();
-                std::string az;
-                pSatellite->getAzimuth(az);
-                std::string el;
-                pSatellite->getElevation(el);
+                std::string az = std::to_string(pSatellite->getAzimuth());
+                std::string el = std::to_string(pSatellite->getElevation());
                 std::string position = "   Azimuth=" + az + ", Elevation=" + el;
                 ImGui::Text(position.c_str());
 

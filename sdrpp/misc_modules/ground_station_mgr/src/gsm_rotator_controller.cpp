@@ -192,8 +192,8 @@ GsmResult_e GsmRotatorController::handleGetSatellitePosReq(GsmMsgGetSatellitePos
 	pMsg->setData((char*)rsp.c_str(), (int)rsp.size());
 	pMsg->setTaskId(taskId);
 	pMsg->setSatellite(satellite);
-	pMsg->setElevation(el);
-	pMsg->setAzimuth(az);
+	pMsg->setElevation(std::stod(el));
+	pMsg->setAzimuth(std::stod(az));
 
 	GsmCommMgr::getInstance()->sendMsg(pMsg);
 
@@ -239,18 +239,18 @@ GsmResult_e GsmRotatorController::handleMoveRotatorReq(GsmMsgMoveRotatorReq* _ms
 {
 	std::string taskId;
 	std::string rsp;
-    std::string az;
-    std::string el;
+    double az;
+    double el;
 
     _msg->getTaskId(taskId);
-	_msg->getElevation(el);
-	_msg->getAzimuth(az);
+	el = _msg->getElevation();
+	az = _msg->getAzimuth();
 
 	spdlog::info("GsmRotatorController::handleMoveRotatorReq: az={0}, el={1}",
-			az.c_str(), el.c_str());
+			az, el);
 
     // Send move/position command to rotctld
-    std::string rotcommand = "P " + az + " " + el;
+    std::string rotcommand = "P " + std::to_string(az) + " " + std::to_string(el);
     sendCommandToRotctld(rotcommand, rsp);
 
     // TODO: fill in success/failure in response
@@ -328,8 +328,8 @@ GsmResult_e GsmRotatorController::handleGetRotatorPosReq(GsmMsgGetRotatorPosReq*
 		std::string az = tokens[0];
 		std::string el = tokens[1];
 
-		pMsg->setAzimuth(az);
-		pMsg->setElevation(el);
+		pMsg->setAzimuth(std::stod(az));
+		pMsg->setElevation(std::stod(el));
 	}
 
 	GsmCommMgr::getInstance()->sendMsg((GsmMsg*)pMsg);
